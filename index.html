@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MJD Cars | نظام الفايربيس المتكامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<!-- مكتبات Firebase الإصدار المتوافق -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<style>
+:root {
+  --bg: #0a0a0a; --fg: #ffffff; --muted: #888; --accent: #007aff; --card: #161616;
+  --border: #2c2c2c; --danger: #ff3b30; --success: #34c759; --panel-bg: #1c1c1e;
+}
+* { box-sizing: border-box; transition: 0.3s; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
+/* الستايل المرتب للمدخلات */
+.input-group { margin-bottom: 15px; }
+input, select, textarea {
+  width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border);
+  background: #222; color: #fff; outline: none; font-size: 16px;
+}
+input:focus { border-color: var(--accent); }
+
+button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 800; font-size: 16px; }
+.btn-primary { background: var(--accent); color: #fff; width: 100%; }
+.btn-danger { background: var(--danger); color: #fff; padding: 8px 15px; font-size: 13px; }
+
+/* الكروت والقوائم */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
+.card img { width: 100%; height: 180px; object-fit: cover; background: #333; }
+.card-content { padding: 15px; }
+
+.admin-row { 
+    background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent);
+}
+
+/* النوافذ */
+.overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; }
+.overlay.active { display: flex; }
+.modal { background: var(--panel-bg); width: 100%; max-width: 500px; padding: 25px; border-radius: 24px; max-height: 90vh; overflow-y: auto; }
+
+/* التنقل السفلي */
+.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(28,28,30,0.8); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); }
+.nav-btn { color: var(--muted); cursor: pointer; font-size: 14px; }
+.nav-btn.active { color: var(--accent); font-weight: 900; }
+</style>
+</head>
+<body>
+
+<div id="app" class="container">
+    <!-- الرئيسية -->
+    <div id="home-view">
+        <h1 style="font-size: 32px;">MJD Cars 🚗</h1>
+        <div id="main-gallery" class="grid"></div>
+    </div>
+
+    <!-- سياراتي -->
+    <div id="my-cars-view" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <h2>سياراتك المعروضة</h2>
+            <button onclick="showAddModal()" style="background:var(--success); color:#fff; padding:10px 20px">+ إضافة</button>
+        </div>
+        <div id="personal-gallery" class="grid"></div>
+    </div>
+
+    <!-- الإدارة -->
+    <div id="admin-view" style="display:none">
+        <h2>لوحة التحكم الإدارية</h2>
+        <div id="admin-list"></div>
+    </div>
+</div>
+
+<!-- نافذة إضافة سيارة -->
+<div id="add-modal" class="overlay">
+    <div class="modal">
+        <h3>بيانات السيارة الجديدة</h3>
+        <div class="input-group">
+            <select id="car-brand"><option>DODGE</option><option>TOYOTA</option><option>BMW</option><option>MERCEDES</option></select>
+        </div>
+        <div class="input-group"><input type="text" id="car-price" placeholder="السعر (مثال: 25,000$)"></div>
+        <div class="input-group"><input type="tel" id="car-phone" placeholder="رقم الموبايل"></div>
+        <div class="input-group">
+            <label style="display:block; margin-bottom:8px; color:var(--muted)">اختر صورة السيارة:</label>
+            <input type="file" id="car-file" accept="image/*">
+        </div>
+        <button id="submit-btn" onclick="uploadCar()" class="btn-primary">رفع الإعلان الآن</button>
+        <button onclick="hideAddModal()" class="btn-ghost" style="width:100%; margin-top:10px; color:#fff">إلغاء</button>
+    </div>
+</div>
+
+<nav class="nav-bar">
+    <div class="nav-btn active" onclick="switchTab('home')">الرئيسية</div>
+    <div class="nav-btn" onclick="switchTab('my-cars')">سياراتي</div>
+    <div class="nav-btn" onclick="checkAdmin()">الإدارة</div>
+</nav>
+
+<script>
+// الإعدادات الخاصة بك
+const firebaseConfig = {
+  apiKey: "AIzaSyDQC-h8a1CFBeXISxJnJjYrWTw3lH00dgU",
+  authDomain: "nickname-701a2.firebaseapp.com",
+  databaseURL: "https://nickname-701a2-default-rtdb.firebaseio.com/",
+  projectId: "nickname-701a2",
+  storageBucket: "nickname-701a2.appspot.com",
+  messagingSenderId: "214250416630",
+  appId: "1:214250416630:web:27f1feff443800334e7fd7",
+  measurementId: "G-W4DHD41F9Z"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const ADMIN_PASS = "WsamKsan2007";
+const DELETE_PASS = "Wsamksan2007";
+
+// نظام هوية بسيط (بناءً على المتصفح)
+const userId = localStorage.getItem('mjd_uid') || 'user_' + Math.random().toString(36).substr(2, 9);
+localStorage.setItem('mjd_uid', userId);
+
+// جلب البيانات لحظياً
+db.ref('cars').on('value', (snap) => {
+    const data = snap.val();
+    const list = data ? Object.keys(data).map(k => ({...data[k], key: k})) : [];
+    render(list);
+});
+
+function uploadCar() {
+    const file = document.getElementById('car-file').files[0];
+    const brand = document.getElementById('car-brand').value;
+    const price = document.getElementById('car-price').value;
+    const phone = document.getElementById('car-phone').value;
+    const btn = document.getElementById('submit-btn');
+
+    if(!file || !price || !phone) return alert("يرجى ملء كافة الحقول واختيار صورة");
+
+    btn.disabled = true;
+    btn.innerText = "جاري الرفع...";
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // ضغط الصورة (تقليل الحجم لضمان القبول في فايربيس)
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxW = 600; 
+            const scale = maxW / img.width;
+            canvas.width = maxW;
+            canvas.height = img.height * scale;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // ضغط 70%
+
+            const newCar = {
+                brand, price, phone,
+                image: compressedBase64,
+                owner: userId,
+                status: 'pending', // لا تظهر في الرئيسية حتى يوافق الأدمن
+                createdAt: Date.now()
+            };
+
+            db.ref('cars').push(newCar).then(() => {
+                hideAddModal();
+                btn.disabled = false;
+                btn.innerText = "رفع الإعلان الآن";
+                alert("تم الرفع! سيظهر إعلانك بعد موافقة الإدارة.");
+            });
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+function render(cars) {
+    const main = document.getElementById('main-gallery');
+    const personal = document.getElementById('personal-gallery');
+    const admin = document.getElementById('admin-list');
+
+    // 1. الرئيسية (الموافقة فقط)
+    const approved = cars.filter(c => c.status === 'approved');
+    main.innerHTML = approved.map(c => `
+        <div class="card">
+            <img src="${c.image}">
+            <div class="card-content">
+                <strong>${c.brand}</strong>
+                <p style="color:var(--accent)">${c.price}</p>
+                <a href="tel:${c.phone}" style="text-decoration:none; color:var(--success)">📞 اتصال</a>
+            </div>
+        </div>
+    `).join('') || '<p>لا توجد سيارات معروضة حالياً</p>';
+
+    // 2. سياراتي
+    const my = cars.filter(c => c.owner === userId);
+    personal.innerHTML = my.map(c => `
+        <div class="card">
+            <img src="${c.image}">
+            <div class="card-content">
+                <strong>${c.brand}</strong>
+                <div style="font-size:12px; color:${c.status === 'approved' ? 'var(--success)' : 'orange'}">
+                    ${c.status === 'approved' ? '● منشور' : '● قيد المراجعة'}
+                </div>
+                <button onclick="askDelete('${c.key}')" class="btn-danger" style="width:100%; margin-top:10px">حذف</button>
+            </div>
+        </div>
+    `).join('');
+
+    // 3. الإدارة
+    admin.innerHTML = cars.map(c => `
+        <div class="admin-row">
+            <img src="${c.image}" style="width:50px; height:40px; border-radius:5px">
+            <div style="flex:1; margin: 0 10px; font-size:13px">
+                <b>${c.brand}</b> (${c.price})
+            </div>
+            <div style="display:flex; gap:5px">
+                ${c.status === 'pending' ? `<button onclick="approve('${c.key}')" style="background:var(--success); color:#fff; border-radius:8px; padding:5px">موافقة</button>` : ''}
+                <button onclick="askDelete('${c.key}', true)" class="btn-danger" style="padding:5px">حذف</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function approve(key) {
+    db.ref('cars/' + key).update({ status: 'approved' });
+}
+
+function askDelete(key, isAdmin = false) {
+    const p = prompt("أدخل رمز الحذف:");
+    if(p === DELETE_PASS) {
+        db.ref('cars/' + key).remove();
+        alert("تم الحذف بنجاح");
+    } else {
+        alert("الرمز خاطئ");
+    }
+}
+
+function switchTab(tab) {
+    document.getElementById('home-view').style.display = tab === 'home' ? 'block' : 'none';
+    document.getElementById('my-cars-view').style.display = tab === 'my-cars' ? 'block' : 'none';
+    document.getElementById('admin-view').style.display = tab === 'admin' ? 'block' : 'none';
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+}
+
+function checkAdmin() {
+    const p = prompt("رمز الدخول للإدارة:");
+    if(p === ADMIN_PASS) switchTab('admin');
+    else alert("ليس لديك صلاحية");
+}
+
+function showAddModal() { document.getElementById('add-modal').classList.add('active'); }
+function hideAddModal() { document.getElementById('add-modal').classList.remove('active'); }
+</script>
+
+</body>
+</html>
