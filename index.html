@@ -3,149 +3,133 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MJD Cars | نظام الفايربيس المطور</title>
+<title>MJD Cars | التحديث المطور</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-
-<!-- مكتبات Firebase (v9 Compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
 <style>
-:root {
-  --bg: #0a0a0a; --fg: #ffffff; --muted: #888; --accent: #007aff; --card: #161616;
-  --border: #2c2c2c; --danger: #ff3b30; --success: #34c759; --panel-bg: #1c1c1e;
-}
-* { box-sizing: border-box; transition: 0.3s; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; }
-.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-
-/* واجهة التسجيل */
-#auth-view {
-    position: fixed; inset: 0; background: var(--bg); z-index: 2000;
-    display: flex; align-items: center; justify-content: center; padding: 20px;
-}
-.auth-card {
-    background: var(--card); padding: 30px; border-radius: 25px; 
-    width: 100%; max-width: 400px; border: 1px solid var(--border); text-align: center;
-}
-
-.input-group { margin-bottom: 15px; text-align: right; }
-label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 14px; }
-input, select, textarea {
-  width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border);
-  background: #222; color: #fff; outline: none; font-size: 16px;
-}
-button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 800; }
-.btn-primary { background: var(--accent); color: #fff; width: 100%; margin-top: 10px; }
-.btn-danger { background: var(--danger); color: #fff; padding: 12px; font-size: 15px; cursor: pointer; border-radius: 12px; }
-
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-.card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
-.card img { width: 100%; height: 180px; object-fit: cover; background: #333; }
-.card-content { padding: 15px; }
-
-.admin-row { 
-    background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px;
-    display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent);
-}
-
-.overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; }
-.overlay.active { display: flex; }
-.modal { background: var(--panel-bg); width: 100%; max-width: 500px; padding: 25px; border-radius: 24px; }
-
-.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(28,28,30,0.8); backdrop-filter: blur(15px); display: none; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); z-index: 100; }
-.nav-btn { color: var(--muted); cursor: pointer; font-size: 14px; }
+:root { --bg: #050505; --fg: #ffffff; --muted: #a0a0a0; --accent: #007aff; --card: #121212; --border: #252525; --danger: #ff3b30; --success: #34c759; --gold: #d4af37; }
+* { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; overflow-x: hidden; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; animation: fadeIn 0.5s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+input, select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #1a1a1a; color: #fff; outline: none; font-size: 15px; font-family: 'Tajawal'; margin-bottom: 10px; }
+button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 800; font-family: 'Tajawal'; transition: 0.2s; }
+.btn-primary { background: var(--accent); color: #fff; width: 100%; }
+.btn-danger { background: var(--danger); color: #fff; width: 100%; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+.card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; position: relative; }
+.card img { width: 100%; height: 140px; object-fit: cover; }
+.card-info { padding: 10px; }
+.card-price { color: var(--accent); font-weight: 900; font-size: 14px; }
+.status-badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #fff; }
+.overlay { position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.85); z-index: 2000; }
+.overlay.active { display: flex; animation: slideUp 0.3s ease; }
+.modal { background: #1c1c1e; width: 100%; max-width: 500px; padding: 25px; border-radius: 30px 30px 0 0; max-height: 90vh; overflow-y: auto; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20,20,22,0.9); backdrop-filter: blur(20px); display: none; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); z-index: 1000; }
+.nav-btn { color: var(--muted); cursor: pointer; font-size: 12px; text-align: center; }
 .nav-btn.active { color: var(--accent); font-weight: 900; }
-
-.user-info-box { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; text-align: center; }
+.filter-tags { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+.tag { padding: 8px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; font-size: 13px; color: var(--muted); cursor: pointer; }
+.tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.menu-item { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; flex-direction: column; margin-bottom: 10px; text-align: right; }
+.menu-item span { font-weight: 700; }
+.menu-item small { color: var(--muted); font-size: 11px; }
+.vip-badge { color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 5px; font-size: 10px; }
 </style>
 </head>
 <body>
 
-<!-- واجهة تسجيل الدخول -->
 <div id="auth-view">
-    <div class="auth-card">
-        <h1 style="margin-bottom: 10px;">MJD Cars 🚗</h1>
-        <p id="auth-title" style="color: var(--muted); margin-bottom: 25px;">مرحباً بك، سجل دخولك للمتابعة</p>
-        
-        <div class="input-group">
+    <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+        <div style="background: var(--card); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid var(--border); text-align: center;">
+            <h1 style="font-weight: 900;">MJD CARS</h1>
             <input type="email" id="auth-email" placeholder="البريد الإلكتروني">
-        </div>
-        <div class="input-group">
             <input type="password" id="auth-pass" placeholder="كلمة المرور">
+            <button onclick="handleAuth()" class="btn-primary" id="auth-main-btn" style="margin-top:10px">دخول</button>
+            <p onclick="toggleAuthMode()" id="auth-toggle" style="margin-top:20px; font-size:13px; color:var(--accent); cursor:pointer;">إنشاء حساب جديد</p>
         </div>
-        
-        <button id="auth-main-btn" onclick="handleAuth()" class="btn-primary">تسجيل الدخول</button>
-        
-        <p style="margin-top: 20px; font-size: 14px;">
-            <span id="auth-switch-text">ليس لديك حساب؟</span> 
-            <a href="#" id="auth-toggle" onclick="toggleAuthMode()" style="color: var(--accent); text-decoration: none; font-weight: bold;">إنشاء حساب جديد</a>
-        </p>
     </div>
 </div>
 
 <div id="main-app" style="display: none;">
-    <div id="app" class="container">
-        <!-- الرئيسية -->
+    <div class="container">
         <div id="home-view">
-            <h1 style="font-size: 28px;">سيارات MJD المعروضة 🚗</h1>
+            <h2 style="font-weight: 900;">اكتشف الأفضل 🚗</h2>
             <div id="main-gallery" class="grid"></div>
         </div>
-
-        <!-- سياراتي -->
+        <div id="search-view" style="display:none">
+            <input type="text" id="search-input" placeholder="ابحث عن سيارة..." oninput="runSearch()">
+            <div class="filter-tags">
+                <div class="tag active" onclick="setFilter('all', this)">الكل</div>
+                <div class="tag" onclick="setFilter('vip', this)">سيارات VIP</div>
+                <div class="tag" onclick="setFilter('cheap', this)">رخيصة الثمن</div>
+                <div class="tag" onclick="setFilter('6cyl', this)">6 سلندر</div>
+            </div>
+            <div id="search-results" class="grid"></div>
+        </div>
         <div id="my-cars-view" style="display:none">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                <h2>إعلاناتي الخاصة</h2>
-                <button onclick="showAddModal()" style="background:var(--success); color:#fff; padding:10px 20px; border-radius:10px">+ إضافة سيارة</button>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3>إعلاناتي</h3>
+                <button onclick="showAddModal()" style="background:var(--success); color:#fff; padding:8px 15px; border-radius:10px;">+ إضافة</button>
             </div>
             <div id="personal-gallery" class="grid"></div>
         </div>
-
-        <!-- الإدارة -->
-        <div id="admin-view" style="display:none">
-            <h2>لوحة التحكم (الإدارة فقط)</h2>
-            <div id="admin-list"></div>
-        </div>
-
-        <!-- الحساب -->
-        <div id="profile-view" style="display:none">
-            <h2>معلومات الحساب</h2>
-            <div class="user-info-box">
-                <div style="font-size: 50px; margin-bottom: 10px;">👤</div>
-                <div id="display-user-email" style="font-weight: bold; font-size: 18px; margin-bottom: 5px;"></div>
-                <div id="display-user-id" style="color: var(--muted); font-size: 12px; margin-bottom: 15px;"></div>
-                <p style="color: var(--muted); font-size: 14px;">أنت الآن عضو نشط في MJD Cars</p>
-                <button onclick="logout()" class="btn-danger" style="width: 100%; margin-top: 20px;">تسجيل الخروج</button>
+        <div id="profile-view" style="display:none;">
+            <div style="text-align:center; margin-bottom: 25px;">
+                <div style="font-size:50px; background:#222; width:80px; height:80px; line-height:80px; border-radius:50%; margin:0 auto 10px;">👤</div>
+                <h3 id="user-display-email"></h3>
+                <div id="user-uid-box" style="font-size:11px; color:var(--accent); font-family:monospace;"></div>
             </div>
+            <div class="menu-item" onclick="location.href='mailto:amjedfleh3@gmail.com'"><span>📧 مساعدة</span><small>تواصل معنا عبر البريد</small></div>
+            <div class="menu-item" onclick="window.open('https://carsiq.netlify.app', '_blank')"><span>🌐 الموقع الإلكتروني</span><small>زيارة موقعنا الرسمي</small></div>
+            <div class="menu-item" onclick="showAdminForm()"><span>🛡️ التقديم للإدارة</span><small>أرسل طلب انضمام لفريق العمل</small></div>
+            <div class="menu-item" style="opacity:0.5"><span>🚀 ترويج</span><small>سيتوفر لاحقاً</small></div>
+            <button onclick="auth.signOut()" class="btn-danger" style="margin-top:20px;">تسجيل الخروج</button>
         </div>
     </div>
-
     <nav class="nav-bar" id="bottom-nav">
         <div class="nav-btn active" onclick="switchTab('home')">الرئيسية</div>
+        <div class="nav-btn" onclick="switchTab('search')">بحث</div>
         <div class="nav-btn" onclick="switchTab('my-cars')">سياراتي</div>
-        <div class="nav-btn" onclick="checkAdmin()">الإدارة</div>
         <div class="nav-btn" onclick="switchTab('profile')">حسابي</div>
     </nav>
 </div>
 
-<!-- نافذة الإضافة -->
+<div id="details-modal" class="overlay"><div class="modal" id="details-content"></div></div>
+<div id="admin-modal" class="overlay">
+    <div class="modal">
+        <h3>طلب انضمام للإدارة</h3>
+        <input type="text" id="adm-name" placeholder="الاسم الكامل">
+        <input type="number" id="adm-age" placeholder="العمر">
+        <select id="adm-gender"><option>ذكر</option><option>أنثى</option></select>
+        <input type="tel" id="adm-phone" placeholder="رقم الجوال">
+        <input type="email" id="adm-email" placeholder="الايميل">
+        <input type="password" id="adm-pass" placeholder="كلمة المرور">
+        <input type="password" id="adm-confirm" placeholder="تأكيد كلمة المرور">
+        <button onclick="submitAdminForm()" class="btn-primary">إرسال الطلب</button>
+        <button onclick="hideAdminForm()" style="width:100%; background:none; color:#fff; margin-top:10px">إلغاء</button>
+    </div>
+</div>
 <div id="add-modal" class="overlay">
     <div class="modal">
-        <h3>إضافة سيارة جديدة</h3>
-        <div class="input-group"><label>الماركة</label>
-            <select id="car-brand"><option>TOYOTA</option><option>DODGE</option><option>BMW</option><option>MERCEDES</option><option>KIA</option></select>
-        </div>
-        <div class="input-group"><label>السعر</label><input type="text" id="car-price" placeholder="مثال: 15,000$"></div>
-        <div class="input-group"><label>رقم التواصل</label><input type="tel" id="car-phone" placeholder="07XXXXXXXX"></div>
-        <div class="input-group"><label>صورة السيارة</label><input type="file" id="car-file" accept="image/*"></div>
-        <button id="submit-btn" onclick="uploadCar()" class="btn-primary">نشر الإعلان</button>
-        <button onclick="hideAddModal()" style="background:none; color:#fff; width:100%; margin-top:10px;">إلغاء</button>
+        <h3>نشر إعلان جديد</h3>
+        <select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES</option><option>CADILLAC</option><option>LEXUS</option></select>
+        <input type="text" id="in-model" placeholder="الموديل">
+        <input type="number" id="in-year" placeholder="سنة الصنع">
+        <input type="text" id="in-price" placeholder="السعر (مثلاً: 15,000$)">
+        <select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option></select>
+        <textarea id="in-notes" rows="2" placeholder="ملاحظات إضافية"></textarea>
+        <input type="file" id="in-files" multiple accept="image/*">
+        <button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button>
+        <button onclick="hideAddModal()" style="width:100%; background:none; color:#fff">إلغاء</button>
     </div>
 </div>
 
 <script>
-// --- إعدادات Firebase ---
 const firebaseConfig = {
   apiKey: "AIzaSyDQC-h8a1CFBeXISxJnJjYrWTw3lH00dgU",
   authDomain: "nickname-701a2.firebaseapp.com",
@@ -157,187 +141,141 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-const ADMIN_PASS = "WsamKsan2007";
+const auth = firebase.auth(), db = firebase.database();
+let allCars = [], currentFilter = 'all', isSignUp = false;
 
-let isSignUpMode = false;
-let currentUser = null;
-
-// --- نظام المصادقة (Auth) ---
-
-// مراقبة حالة المستخدم
 auth.onAuthStateChanged(user => {
-    if (user) {
-        currentUser = user;
+    if(user) {
         document.getElementById('auth-view').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         document.getElementById('bottom-nav').style.display = 'flex';
-        document.getElementById('display-user-email').innerText = user.email;
-        document.getElementById('display-user-id').innerText = "UID: " + user.uid;
-        loadCars();
+        document.getElementById('user-display-email').innerText = user.email;
+        const uid = (user.uid.substring(0,5) + user.uid.substring(user.uid.length - 5)).toUpperCase();
+        document.getElementById('user-uid-box').innerText = "UID: " + uid;
+        loadData();
     } else {
-        document.getElementById('auth-view').style.display = 'flex';
+        document.getElementById('auth-view').style.display = 'block';
         document.getElementById('main-app').style.display = 'none';
-        document.getElementById('bottom-nav').style.display = 'none';
     }
 });
 
-function toggleAuthMode() {
-    isSignUpMode = !isSignUpMode;
-    document.getElementById('auth-title').innerText = isSignUpMode ? "إنشاء حساب جديد" : "مرحباً بك، سجل دخولك للمتابعة";
-    document.getElementById('auth-main-btn').innerText = isSignUpMode ? "إنشاء الحساب" : "تسجيل الدخول";
-    document.getElementById('auth-switch-text').innerText = isSignUpMode ? "لديك حساب بالفعل؟" : "ليس لديك حساب؟";
-    document.getElementById('auth-toggle').innerText = isSignUpMode ? "تسجيل الدخول" : "إنشاء حساب جديد";
-}
-
 function handleAuth() {
-    const email = document.getElementById('auth-email').value;
-    const pass = document.getElementById('auth-pass').value;
-
-    if(!email || !pass) return alert("يرجى ملء كافة الحقول");
-
-    if (isSignUpMode) {
-        auth.createUserWithEmailAndPassword(email, pass)
-            .catch(err => alert("خطأ في الإنشاء: " + err.message));
-    } else {
-        auth.signInWithEmailAndPassword(email, pass)
-            .catch(err => alert("خطأ في الدخول: " + err.message));
-    }
+    const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
+    if(isSignUp) auth.createUserWithEmailAndPassword(e,p).catch(err => alert(err.message));
+    else auth.signInWithEmailAndPassword(e,p).catch(err => alert(err.message));
 }
 
-function logout() {
-    if(confirm("هل تريد تسجيل الخروج؟")) {
-        auth.signOut();
-    }
+function toggleAuthMode() {
+    isSignUp = !isSignUp;
+    document.getElementById('auth-main-btn').innerText = isSignUp ? "تسجيل" : "دخول";
 }
 
-// --- إدارة البيانات ---
-
-function loadCars() {
-    db.ref('cars').on('value', (snap) => {
-        const data = snap.val();
-        const list = data ? Object.keys(data).map(k => ({...data[k], key: k})) : [];
-        render(list);
+function loadData() {
+    db.ref('cars').on('value', snap => {
+        const val = snap.val();
+        allCars = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
+        renderHome();
+        runSearch();
     });
 }
 
-function uploadCar() {
-    const file = document.getElementById('car-file').files[0];
-    const brand = document.getElementById('car-brand').value;
-    const price = document.getElementById('car-price').value;
-    const phone = document.getElementById('car-phone').value;
-    const btn = document.getElementById('submit-btn');
-
-    if(!file || !price || !phone) return alert("أكمل البيانات");
-
-    btn.disabled = true;
-    btn.innerText = "جاري الرفع...";
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const max_size = 500; 
-            let w = img.width, h = img.height;
-            if (w > h) { if (w > max_size) { h *= max_size / w; w = max_size; } }
-            else { if (h > max_size) { w *= max_size / h; h = max_size; } }
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            
-            db.ref('cars').push({
-                brand, price, phone, owner: currentUser.uid,
-                ownerEmail: currentUser.email,
-                image: canvas.toDataURL('image/jpeg', 0.6),
-                status: 'pending',
-                date: Date.now()
-            }).then(() => {
-                hideAddModal();
-                btn.disabled = false; btn.innerText = "نشر الإعلان";
-                alert("تم الإرسال للإدارة بنجاح");
-            });
-        };
-    };
-    reader.readAsDataURL(file);
+function renderHome() {
+    const gallery = document.getElementById('main-gallery');
+    gallery.innerHTML = allCars.filter(c => c.status === 'approved').map(c => carCard(c)).join('') || "<p>لا يوجد سيارات</p>";
+    document.getElementById('personal-gallery').innerHTML = allCars.filter(c => c.owner === auth.currentUser.uid).map(c => carCard(c, true)).join('');
 }
 
-function render(cars) {
-    const main = document.getElementById('main-gallery');
-    const personal = document.getElementById('personal-gallery');
-    const admin = document.getElementById('admin-list');
-
-    // الرئيسية
-    main.innerHTML = cars.filter(c => c.status === 'approved').map(c => `
-        <div class="card">
-            <img src="${c.image}">
-            <div class="card-content">
-                <strong>${c.brand}</strong>
-                <p style="color:var(--accent)">${c.price}</p>
-                <a href="tel:${c.phone}" style="color:var(--success); text-decoration:none; font-weight:bold;">📞 اتصل الآن</a>
-            </div>
-        </div>
-    `).join('') || '<p style="grid-column:1/-1; text-align:center; padding:20px; color:var(--muted)">لا يوجد سيارات متاحة حالياً.</p>';
-
-    // سياراتي
-    personal.innerHTML = cars.filter(c => c.owner === currentUser.uid).map(c => `
-        <div class="card">
-            <img src="${c.image}">
-            <div class="card-content">
-                <strong>${c.brand}</strong>
-                <div style="font-size:12px; margin-top:5px; color:${c.status === 'approved' ? 'var(--success)' : 'orange'}">
-                    ${c.status === 'approved' ? '● منشور ومقبول' : '● بانتظار موافقة الإدارة'}
-                </div>
-                <button onclick="deleteCar('${c.key}', false)" class="btn-danger" style="width:100%; margin-top:10px; padding:8px;">حذف الإعلان</button>
-            </div>
-        </div>
-    `).join('') || '<p style="grid-column:1/-1; text-align:center; padding:20px; color:var(--muted)">لم تقم بإضافة أي سيارات بعد.</p>';
-
-    // الإدارة
-    admin.innerHTML = cars.map(c => `
-        <div class="admin-row">
-            <img src="${c.image}" style="width:40px; height:30px; border-radius:4px; object-fit:cover;">
-            <div style="flex:1; margin-right:10px; font-size:11px">
-                <b>${c.brand}</b><br><span style="color:var(--muted)">${c.ownerEmail}</span>
-            </div>
-            <div>
-                ${c.status === 'pending' ? `<button onclick="approve('${c.key}')" style="background:var(--success); color:#fff; border-radius:5px; padding:4px 8px; margin-left:5px; font-size:11px">قبول</button>` : ''}
-                <button onclick="deleteCar('${c.key}', true)" class="btn-danger" style="padding:4px 8px; font-size:11px">حذف</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function approve(key) { db.ref('cars/' + key).update({ status: 'approved' }); }
-
-function deleteCar(key, isAdminDelete) {
-    if(isAdminDelete) {
-        const p = prompt("رمز الإدارة للحذف:");
-        if(p !== ADMIN_PASS) return alert("رمز خطأ!");
+function carCard(c, isPersonal = false) {
+    const isVip = ['BMW','MERCEDES','CADILLAC','LEXUS'].includes(c.brand) && parseInt(c.year) >= 2020;
+    let statusBadge = "";
+    if(isPersonal) {
+        const s = c.status;
+        const color = s === 'approved' ? 'var(--success)' : (s === 'rejected' ? 'var(--danger)' : 'orange');
+        const text = s === 'approved' ? 'مقبول' : (s === 'rejected' ? 'مرفوض' : 'معلق');
+        statusBadge = `<div class="status-badge" style="background:${color}">${text}</div>`;
     }
+    return `<div class="card" onclick="showDetails('${c.id}')">${statusBadge}<img src="${c.images ? c.images[0] : ''}"><div class="card-info"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;font-size:12px">${c.brand} ${c.model}</span>${isVip ? '<span class="vip-badge">VIP</span>' : ''}</div><div class="card-price">${c.price}</div></div></div>`;
+}
+
+function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    runSearch();
+}
+
+function runSearch() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    let filtered = allCars.filter(c => c.status === 'approved');
+    if(currentFilter === 'vip') filtered = filtered.filter(c => ['BMW','MERCEDES','CADILLAC','LEXUS'].includes(c.brand) && parseInt(c.year) >= 2020);
+    else if(currentFilter === 'cheap') filtered = filtered.filter(c => parseInt(c.price.replace(/[^0-9]/g, '')) <= 100);
+    else if(currentFilter === '6cyl') filtered = filtered.filter(c => c.cyl === '6');
+    if(query) filtered = filtered.filter(c => c.brand.toLowerCase().includes(query) || c.model.toLowerCase().includes(query));
+    document.getElementById('search-results').innerHTML = filtered.map(c => carCard(c)).join('') || "<p>لا توجد نتائج</p>";
+}
+
+function showDetails(id) {
+    const c = allCars.find(x => x.id === id);
+    if(!c) return;
+    const isOwner = c.owner === auth.currentUser.uid;
+    let statusInfo = "";
+    if(isOwner) {
+        const s = c.status;
+        const text = s === 'approved' ? 'مقبول ومنشور' : (s === 'rejected' ? 'مرفوض من الإدارة' : 'بانتظار مراجعة الإدارة');
+        const color = s === 'approved' ? 'var(--success)' : (s === 'rejected' ? 'var(--danger)' : 'orange');
+        statusInfo = `<div style="padding:10px; border-radius:10px; background:${color}22; color:${color}; margin-bottom:15px; text-align:center; font-weight:700">حالة الإعلان: ${text}</div>`;
+    }
+
+    document.getElementById('details-content').innerHTML = `
+        ${statusInfo}
+        <h2 style="margin:0">${c.brand} ${c.model}</h2>
+        <p style="color:var(--accent); font-weight:900; font-size:22px">${c.price}</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:14px; margin-bottom:15px;">
+            <div><span style="color:var(--muted)">السنة:</span> ${c.year}</div>
+            <div><span style="color:var(--muted)">السلندر:</span> ${c.cyl}</div>
+        </div>
+        <p style="background:#222; padding:10px; border-radius:10px; font-size:13px">${c.notes || 'بدون ملاحظات'}</p>
+        <div style="margin-top:15px">${c.images.map(img => `<img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px;">`).join('')}</div>
+        ${isOwner ? `<button onclick="deleteCar('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>` : ''}
+        <button onclick="closeDetails()" class="btn-primary">إغلاق</button>
+    `;
+    document.getElementById('details-modal').classList.add('active');
+}
+
+function deleteCar(id) {
     if(confirm("هل أنت متأكد من حذف هذا الإعلان نهائياً؟")) {
-        db.ref('cars/' + key).remove();
+        db.ref('cars/' + id).remove().then(() => {
+            alert("تم الحذف بنجاح");
+            closeDetails();
+        });
     }
 }
 
-function switchTab(tab) {
-    ['home', 'my-cars', 'admin', 'profile'].forEach(t => {
-        document.getElementById(t + '-view').style.display = t === tab ? 'block' : 'none';
-    });
-    document.querySelectorAll('.nav-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText.includes(tab === 'home' ? 'الرئيسية' : tab === 'my-cars' ? 'سياراتي' : tab === 'admin' ? 'الإدارة' : 'حسابي'));
-    });
+function closeDetails() { document.getElementById('details-modal').classList.remove('active'); }
+function showAdminForm() { document.getElementById('admin-modal').classList.add('active'); }
+function hideAdminForm() { document.getElementById('admin-modal').classList.remove('active'); }
+
+function submitAdminForm() {
+    const age = parseInt(document.getElementById('adm-age').value);
+    if(age < 18) return alert("لا تكتمل العمر (يجب أن تكون 18 سنة أو أكثر)");
+    if(document.getElementById('adm-pass').value !== document.getElementById('adm-confirm').value) return alert("كلمات المرور غير متطابقة");
+    db.ref('admin_requests').push({ name: document.getElementById('adm-name').value, age: age, gender: document.getElementById('adm-gender').value, phone: document.getElementById('adm-phone').value, email: document.getElementById('adm-email').value, uid: auth.currentUser.uid }).then(() => { alert("تم الإرسال للإدارة"); hideAdminForm(); });
 }
 
-function checkAdmin() {
-    const p = prompt("هذا القسم محمي، أدخل كلمة مرور الإدارة:");
-    if(p === ADMIN_PASS) switchTab('admin');
-    else alert("عذراً، الرمز خاطئ.");
+function switchTab(t) {
+    ['home', 'search', 'my-cars', 'profile'].forEach(v => document.getElementById(v + '-view').style.display = (v === t) ? 'block' : 'none');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(t==='home'?'الرئيسية':t==='search'?'بحث':t==='my-cars'?'سياراتي':'حسابي')));
 }
 
 function showAddModal() { document.getElementById('add-modal').classList.add('active'); }
 function hideAddModal() { document.getElementById('add-modal').classList.remove('active'); }
+
+async function uploadCar() {
+    const files = document.getElementById('in-files').files;
+    if(files.length === 0) return alert("يرجى اختيار صور");
+    const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
+    db.ref('cars').push({ brand: document.getElementById('in-brand').value, model: document.getElementById('in-model').value, year: document.getElementById('in-year').value, price: document.getElementById('in-price').value, cyl: document.getElementById('in-cyl').value, notes: document.getElementById('in-notes').value, images: imgs, owner: auth.currentUser.uid, status: 'pending' }).then(() => { alert("تم الإرسال بانتظار الموافقة"); hideAddModal(); });
+}
 </script>
 </body>
 </html>
