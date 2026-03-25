@@ -116,11 +116,12 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 </div>
 <div id="add-modal" class="overlay">
     <div class="modal">
-        <h3>نشر إعلان جديد</h3>
+        <h3 id="modal-title">نشر إعلان جديد</h3>
         <select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES</option><option>CADILLAC</option><option>LEXUS</option></select>
         <input type="text" id="in-model" placeholder="الموديل">
         <input type="number" id="in-year" placeholder="سنة الصنع">
         <input type="text" id="in-price" placeholder="السعر (مثلاً: 15,000$)">
+        <input type="tel" id="in-phone" placeholder="رقم هاتف التواصل">
         <select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option></select>
         <textarea id="in-notes" rows="2" placeholder="ملاحظات إضافية"></textarea>
         <input type="file" id="in-files" multiple accept="image/*">
@@ -142,7 +143,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.database();
-let allCars = [], currentFilter = 'all', isSignUp = false;
+let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null;
 
 auth.onAuthStateChanged(user => {
     if(user) {
@@ -234,9 +235,13 @@ function showDetails(id) {
             <div><span style="color:var(--muted)">السنة:</span> ${c.year}</div>
             <div><span style="color:var(--muted)">السلندر:</span> ${c.cyl}</div>
         </div>
+        ${c.phone ? `<a href="tel:${c.phone}" style="display:block; text-decoration:none; background:var(--success); color:#fff; text-align:center; padding:12px; border-radius:12px; margin-bottom:15px; font-weight:900;">📞 اتصال بالبائع</a>` : ''}
         <p style="background:#222; padding:10px; border-radius:10px; font-size:13px">${c.notes || 'بدون ملاحظات'}</p>
         <div style="margin-top:15px">${c.images.map(img => `<img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px;">`).join('')}</div>
-        ${isOwner ? `<button onclick="deleteCar('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>` : ''}
+        ${isOwner ? `
+            <button onclick="prepareEdit('${c.id}')" style="background:var(--gold); color:#000; width:100%; margin-bottom:10px; border-radius:12px; padding:14px; font-weight:800;">✏️ تعديل الإعلان</button>
+            <button onclick="deleteCar('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>
+        ` : ''}
         <button onclick="closeDetails()" class="btn-primary">إغلاق</button>
     `;
     document.getElementById('details-modal').classList.add('active');
@@ -267,14 +272,66 @@ function switchTab(t) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(t==='home'?'الرئيسية':t==='search'?'بحث':t==='my-cars'?'سياراتي':'حسابي')));
 }
 
-function showAddModal() { document.getElementById('add-modal').classList.add('active'); }
-function hideAddModal() { document.getElementById('add-modal').classList.remove('active'); }
+function showAddModal() { 
+    editingId = null;
+    document.getElementById('modal-title').innerText = "نشر إعلان جديد";
+    document.getElementById('upload-btn').innerText = "نشر الآن";
+    document.getElementById('add-modal').classList.add('active'); 
+}
+
+function hideAddModal() { 
+    document.getElementById('add-modal').classList.remove('active'); 
+    document.getElementById('in-model').value = "";
+    document.getElementById('in-year').value = "";
+    document.getElementById('in-price').value = "";
+    document.getElementById('in-phone').value = "";
+    document.getElementById('in-notes').value = "";
+}
+
+function prepareEdit(id) {
+    const c = allCars.find(x => x.id === id);
+    if(!c) return;
+    editingId = id;
+    document.getElementById('modal-title').innerText = "تعديل الإعلان";
+    document.getElementById('in-brand').value = c.brand;
+    document.getElementById('in-model').value = c.model;
+    document.getElementById('in-year').value = c.year;
+    document.getElementById('in-price').value = c.price;
+    document.getElementById('in-phone').value = c.phone || "";
+    document.getElementById('in-cyl').value = c.cyl;
+    document.getElementById('in-notes').value = c.notes;
+    document.getElementById('upload-btn').innerText = "حفظ التعديلات";
+    closeDetails();
+    document.getElementById('add-modal').classList.add('active');
+}
 
 async function uploadCar() {
+    const brand = document.getElementById('in-brand').value;
+    const model = document.getElementById('in-model').value;
+    const year = document.getElementById('in-year').value;
+    const price = document.getElementById('in-price').value;
+    const phone = document.getElementById('in-phone').value;
+    const cyl = document.getElementById('in-cyl').value;
+    const notes = document.getElementById('in-notes').value;
     const files = document.getElementById('in-files').files;
-    if(files.length === 0) return alert("يرجى اختيار صور");
-    const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
-    db.ref('cars').push({ brand: document.getElementById('in-brand').value, model: document.getElementById('in-model').value, year: document.getElementById('in-year').value, price: document.getElementById('in-price').value, cyl: document.getElementById('in-cyl').value, notes: document.getElementById('in-notes').value, images: imgs, owner: auth.currentUser.uid, status: 'pending' }).then(() => { alert("تم الإرسال بانتظار الموافقة"); hideAddModal(); });
+    
+    let carData = { brand, model, year, price, phone, cyl, notes, owner: auth.currentUser.uid, status: 'pending' };
+
+    if(editingId) {
+        if(files.length > 0) {
+            const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
+            carData.images = imgs;
+        } else {
+            const oldCar = allCars.find(x => x.id === editingId);
+            carData.images = oldCar.images;
+        }
+        db.ref('cars/' + editingId).update(carData).then(() => { alert("تم التحديث بنجاح"); hideAddModal(); });
+    } else {
+        if(files.length === 0) return alert("يرجى اختيار صور");
+        const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
+        carData.images = imgs;
+        db.ref('cars').push(carData).then(() => { alert("تم الإرسال بانتظار الموافقة"); hideAddModal(); });
+    }
 }
 </script>
 </body>
