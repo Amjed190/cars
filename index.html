@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
 <title>MJD Cars | التحديث المطور</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -15,30 +15,49 @@
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; overflow-x: hidden; }
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
 input, select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #1a1a1a; color: #fff; outline: none; font-size: 15px; font-family: 'Tajawal'; margin-bottom: 10px; }
 button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 800; font-family: 'Tajawal'; transition: 0.2s; }
 .btn-primary { background: var(--accent); color: #fff; width: 100%; }
 .btn-danger { background: var(--danger); color: #fff; width: 100%; }
+
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 .card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; position: relative; }
 .card img { width: 100%; height: 140px; object-fit: cover; }
 .card-info { padding: 10px; }
 .card-price { color: var(--accent); font-weight: 900; font-size: 14px; }
-.status-badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #fff; }
+.status-badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #fff; z-index: 5; }
+
+/* Modal & Full Screen Panel */
 .overlay { position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.85); z-index: 2000; }
 .overlay.active { display: flex; animation: slideUp 0.3s ease; }
 .modal { background: #1c1c1e; width: 100%; max-width: 500px; padding: 25px; border-radius: 30px 30px 0 0; max-height: 90vh; overflow-y: auto; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* Full Screen Add Panel With Blue Border */
+#add-modal .modal { height: 100vh; max-height: 100vh; border-radius: 0; border: 1px solid var(--accent); width: 100vw; max-width: 100vw; }
+
+/* Photo Slider */
+.photo-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin-bottom: 15px; scrollbar-width: none; }
+.photo-slider::-webkit-scrollbar { display: none; }
+.photo-slider img { flex: 0 0 100%; width: 100%; height: 250px; object-fit: cover; border-radius: 15px; scroll-snap-align: start; }
+
 .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20,20,22,0.9); backdrop-filter: blur(20px); display: none; justify-content: space-around; padding: 15px; border-top: 1px solid var(--border); z-index: 1000; }
-.nav-btn { color: var(--muted); cursor: pointer; font-size: 12px; text-align: center; }
-.nav-btn.active { color: var(--accent); font-weight: 900; }
-.filter-tags { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+.nav-btn { color: var(--muted); cursor: pointer; font-size: 12px; text-align: center; transition: 0.3s; }
+.nav-btn.active { color: var(--accent); font-weight: 900; transform: scale(1.1); }
+
 .tag { padding: 8px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; white-space: nowrap; font-size: 13px; color: var(--muted); cursor: pointer; }
 .tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
 .menu-item { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; cursor: pointer; display: flex; flex-direction: column; margin-bottom: 10px; text-align: right; }
 .menu-item span { font-weight: 700; }
 .menu-item small { color: var(--muted); font-size: 11px; }
 .vip-badge { color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 5px; font-size: 10px; }
+
+/* Detail Grid Layout */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+.detail-box { background: #222; padding: 10px; border-radius: 12px; text-align: center; }
+.detail-box small { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -46,9 +65,21 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 <div id="auth-view">
     <div class="container" style="display: flex; height: 100vh; align-items: center; justify-content: center;">
         <div style="background: var(--card); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; border: 1px solid var(--border); text-align: center;">
-            <h1 style="font-weight: 900;">MJD CARS</h1>
+            <h1 id="auth-title" style="font-weight: 900;">MJD CARS</h1>
+            
+            <div id="signup-fields" style="display: none;">
+                <input type="text" id="auth-name" placeholder="الاسم الكامل">
+                <input type="number" id="auth-age" placeholder="العمر">
+                <input type="tel" id="auth-phone" placeholder="رقم الهاتف">
+            </div>
+            
             <input type="email" id="auth-email" placeholder="البريد الإلكتروني">
             <input type="password" id="auth-pass" placeholder="كلمة المرور">
+            
+            <div id="confirm-pass-field" style="display: none;">
+                <input type="password" id="auth-pass-confirm" placeholder="تأكيد كلمة المرور">
+            </div>
+
             <button onclick="handleAuth()" class="btn-primary" id="auth-main-btn" style="margin-top:10px">دخول</button>
             <p onclick="toggleAuthMode()" id="auth-toggle" style="margin-top:20px; font-size:13px; color:var(--accent); cursor:pointer;">إنشاء حساب جديد</p>
         </div>
@@ -61,16 +92,17 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
             <h2 style="font-weight: 900;">اكتشف الأفضل 🚗</h2>
             <div id="main-gallery" class="grid"></div>
         </div>
+        
         <div id="search-view" style="display:none">
             <input type="text" id="search-input" placeholder="ابحث عن سيارة..." oninput="runSearch()">
-            <div class="filter-tags">
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
                 <div class="tag active" onclick="setFilter('all', this)">الكل</div>
                 <div class="tag" onclick="setFilter('vip', this)">سيارات VIP</div>
-                <div class="tag" onclick="setFilter('cheap', this)">رخيصة الثمن</div>
-                <div class="tag" onclick="setFilter('6cyl', this)">6 سلندر</div>
+                <div class="tag" onclick="setFilter('cheap', this)">رخيصة</div>
             </div>
             <div id="search-results" class="grid"></div>
         </div>
+
         <div id="my-cars-view" style="display:none">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
                 <h3>إعلاناتي</h3>
@@ -78,6 +110,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
             </div>
             <div id="personal-gallery" class="grid"></div>
         </div>
+
         <div id="profile-view" style="display:none;">
             <div style="text-align:center; margin-bottom: 25px;">
                 <div style="font-size:50px; background:#222; width:80px; height:80px; line-height:80px; border-radius:50%; margin:0 auto 10px;">👤</div>
@@ -91,39 +124,30 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
             <button onclick="auth.signOut()" class="btn-danger" style="margin-top:20px;">تسجيل الخروج</button>
         </div>
     </div>
+
     <nav class="nav-bar" id="bottom-nav">
-        <div class="nav-btn active" onclick="switchTab('home')">الرئيسية</div>
-        <div class="nav-btn" onclick="switchTab('search')">بحث</div>
-        <div class="nav-btn" onclick="switchTab('my-cars')">سياراتي</div>
-        <div class="nav-btn" onclick="switchTab('profile')">حسابي</div>
+        <div class="nav-btn active" onclick="switchTab('home', this)">الرئيسية</div>
+        <div class="nav-btn" onclick="switchTab('search', this)">بحث</div>
+        <div class="nav-btn" onclick="switchTab('my-cars', this)">سياراتي</div>
+        <div class="nav-btn" onclick="switchTab('profile', this)">حسابي</div>
     </nav>
 </div>
 
 <div id="details-modal" class="overlay"><div class="modal" id="details-content"></div></div>
-<div id="admin-modal" class="overlay">
-    <div class="modal">
-        <h3>طلب انضمام للإدارة</h3>
-        <input type="text" id="adm-name" placeholder="الاسم الكامل">
-        <input type="number" id="adm-age" placeholder="العمر">
-        <select id="adm-gender"><option>ذكر</option><option>أنثى</option></select>
-        <input type="tel" id="adm-phone" placeholder="رقم الجوال">
-        <input type="email" id="adm-email" placeholder="الايميل">
-        <input type="password" id="adm-pass" placeholder="كلمة المرور">
-        <input type="password" id="adm-confirm" placeholder="تأكيد كلمة المرور">
-        <button onclick="submitAdminForm()" class="btn-primary">إرسال الطلب</button>
-        <button onclick="hideAdminForm()" style="width:100%; background:none; color:#fff; margin-top:10px">إلغاء</button>
-    </div>
-</div>
-<div id="add-modal" class="overlay">
+
+<div id="add-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);">
     <div class="modal">
         <h3 id="modal-title">نشر إعلان جديد</h3>
-        <select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES</option><option>CADILLAC</option><option>LEXUS</option></select>
+        <select id="in-brand">
+            <option>TOYOTA</option><option>BMW</option><option>MERCEDES-BENZ</option><option>ROLLS-ROYCE</option><option>RAM</option><option>LEXUS</option><option>FORD</option><option>CHEVROLET</option><option>GMC</option><option>KIA</option><option>HYUNDAI</option><option>DODGE</option><option>NISSAN</option>
+        </select>
         <input type="text" id="in-model" placeholder="الموديل">
+        <input type="text" id="in-color" placeholder="اللون">
         <input type="number" id="in-year" placeholder="سنة الصنع">
-        <input type="text" id="in-price" placeholder="السعر (مثلاً: 15,000$)">
-        <input type="tel" id="in-phone" placeholder="رقم هاتف التواصل">
-        <select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option></select>
-        <textarea id="in-notes" rows="2" placeholder="ملاحظات إضافية"></textarea>
+        <input type="text" id="in-price" placeholder="السعر">
+        <input type="tel" id="in-phone" placeholder="رقم الهاتف">
+        <select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option><option value="12">12 سلندر</option><option value="EV">كهربائية</option></select>
+        <textarea id="in-notes" rows="3" placeholder="ملاحظات إضافية"></textarea>
         <input type="file" id="in-files" multiple accept="image/*">
         <button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button>
         <button onclick="hideAddModal()" style="width:100%; background:none; color:#fff">إلغاء</button>
@@ -157,19 +181,9 @@ auth.onAuthStateChanged(user => {
     } else {
         document.getElementById('auth-view').style.display = 'block';
         document.getElementById('main-app').style.display = 'none';
+        document.getElementById('bottom-nav').style.display = 'none';
     }
 });
-
-function handleAuth() {
-    const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;
-    if(isSignUp) auth.createUserWithEmailAndPassword(e,p).catch(err => alert(err.message));
-    else auth.signInWithEmailAndPassword(e,p).catch(err => alert(err.message));
-}
-
-function toggleAuthMode() {
-    isSignUp = !isSignUp;
-    document.getElementById('auth-main-btn').innerText = isSignUp ? "تسجيل" : "دخول";
-}
 
 function loadData() {
     db.ref('cars').on('value', snap => {
@@ -181,13 +195,13 @@ function loadData() {
 }
 
 function renderHome() {
-    const gallery = document.getElementById('main-gallery');
-    gallery.innerHTML = allCars.filter(c => c.status === 'approved').map(c => carCard(c)).join('') || "<p>لا يوجد سيارات</p>";
-    document.getElementById('personal-gallery').innerHTML = allCars.filter(c => c.owner === auth.currentUser.uid).map(c => carCard(c, true)).join('');
+    document.getElementById('main-gallery').innerHTML = allCars.filter(c => c.status === 'approved').map(c => carCard(c)).join('') || "<p style='text-align:center; padding:20px;'>لا يوجد سيارات معروضة حالياً</p>";
+    document.getElementById('personal-gallery').innerHTML = allCars.filter(c => c.owner === auth.currentUser.uid).map(c => carCard(c, true)).join('') || "<p style='text-align:center; padding:20px;'>لم تقم بنشر أي سيارة بعد</p>";
 }
 
 function carCard(c, isPersonal = false) {
-    const isVip = ['BMW','MERCEDES','CADILLAC','LEXUS'].includes(c.brand) && parseInt(c.year) >= 2020;
+    const vipBrands = ['BMW','MERCEDES-BENZ','LEXUS','ROLLS-ROYCE','PORSCHE'];
+    const isVip = vipBrands.includes(c.brand) && parseInt(c.year) >= 2022;
     let statusBadge = "";
     if(isPersonal) {
         const s = c.status;
@@ -198,6 +212,25 @@ function carCard(c, isPersonal = false) {
     return `<div class="card" onclick="showDetails('${c.id}')">${statusBadge}<img src="${c.images ? c.images[0] : ''}"><div class="card-info"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;font-size:12px">${c.brand} ${c.model}</span>${isVip ? '<span class="vip-badge">VIP</span>' : ''}</div><div class="card-price">${c.price}</div></div></div>`;
 }
 
+function runSearch() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const vipBrands = ['BMW','MERCEDES-BENZ','LEXUS','ROLLS-ROYCE','PORSCHE'];
+    let filtered = allCars.filter(c => c.status === 'approved');
+    if(currentFilter === 'vip') {
+        filtered = filtered.filter(c => vipBrands.includes(c.brand) && parseInt(c.year) >= 2022);
+    } else if(currentFilter === 'cheap') {
+        filtered = filtered.filter(c => parseInt(c.price.replace(/[^0-9]/g, '')) < 15000);
+    }
+    if(query) {
+        filtered = filtered.filter(c => 
+            c.brand.toLowerCase().includes(query) || 
+            c.model.toLowerCase().includes(query) || 
+            (c.notes && c.notes.toLowerCase().includes(query))
+        );
+    }
+    document.getElementById('search-results').innerHTML = filtered.map(c => carCard(c)).join('') || "<p style='text-align:center; grid-column: 1/-1;'>لا توجد نتائج</p>";
+}
+
 function setFilter(f, el) {
     currentFilter = f;
     document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
@@ -205,41 +238,66 @@ function setFilter(f, el) {
     runSearch();
 }
 
-function runSearch() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    let filtered = allCars.filter(c => c.status === 'approved');
-    if(currentFilter === 'vip') filtered = filtered.filter(c => ['BMW','MERCEDES','CADILLAC','LEXUS'].includes(c.brand) && parseInt(c.year) >= 2020);
-    else if(currentFilter === 'cheap') filtered = filtered.filter(c => parseInt(c.price.replace(/[^0-9]/g, '')) <= 100);
-    else if(currentFilter === '6cyl') filtered = filtered.filter(c => c.cyl === '6');
-    if(query) filtered = filtered.filter(c => c.brand.toLowerCase().includes(query) || c.model.toLowerCase().includes(query));
-    document.getElementById('search-results').innerHTML = filtered.map(c => carCard(c)).join('') || "<p>لا توجد نتائج</p>";
+function deleteCar(id) {
+    if(confirm("هل أنت متأكد من حذف هذا الإعلان نهائياً؟")) {
+        db.ref('cars/' + id).remove().then(() => {
+            closeDetails();
+            alert("تم حذف الإعلان بنجاح");
+        });
+    }
+}
+
+function prepareEdit(id) {
+    const c = allCars.find(x => x.id === id);
+    if(!c) return;
+    editingId = id;
+    closeDetails();
+    document.getElementById('modal-title').innerText = "تعديل الإعلان";
+    document.getElementById('in-brand').value = c.brand;
+    document.getElementById('in-model').value = c.model;
+    document.getElementById('in-color').value = c.color || '';
+    document.getElementById('in-year').value = c.year;
+    document.getElementById('in-price').value = c.price;
+    document.getElementById('in-phone').value = c.phone;
+    document.getElementById('in-cyl').value = c.cyl || '4';
+    document.getElementById('in-notes').value = c.notes || '';
+    document.getElementById('add-modal').classList.add('active');
 }
 
 function showDetails(id) {
     const c = allCars.find(x => x.id === id);
     if(!c) return;
-    const isOwner = c.owner === auth.currentUser.uid;
-    let statusInfo = "";
-    if(isOwner) {
-        const s = c.status;
-        const text = s === 'approved' ? 'مقبول ومنشور' : (s === 'rejected' ? 'مرفوض من الإدارة' : 'بانتظار مراجعة الإدارة');
-        const color = s === 'approved' ? 'var(--success)' : (s === 'rejected' ? 'var(--danger)' : 'orange');
-        statusInfo = `<div style="padding:10px; border-radius:10px; background:${color}22; color:${color}; margin-bottom:15px; text-align:center; font-weight:700">حالة الإعلان: ${text}</div>`;
+    const myUid = auth.currentUser ? auth.currentUser.uid : null;
+    let viewers = c.viewers || [];
+    if(myUid && !viewers.includes(myUid)) { 
+        viewers.push(myUid); 
+        db.ref('cars/' + id).update({ viewers: viewers }); 
     }
-
+    const isOwner = myUid === c.owner;
+    let rejectInfo = (isOwner && c.status === 'rejected') ? `<div style="background:var(--danger); color:#fff; padding:10px; border-radius:10px; margin-bottom:15px; font-size:13px; text-align:center">سبب الرفض: ${c.rejectReason || 'غير محدد'}</div>` : "";
     document.getElementById('details-content').innerHTML = `
-        ${statusInfo}
-        <h2 style="margin:0">${c.brand} ${c.model}</h2>
-        <p style="color:var(--accent); font-weight:900; font-size:22px">${c.price}</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:14px; margin-bottom:15px;">
-            <div><span style="color:var(--muted)">السنة:</span> ${c.year}</div>
-            <div><span style="color:var(--muted)">السلندر:</span> ${c.cyl}</div>
+        <div class="photo-slider">${c.images ? c.images.map(img => `<img src="${img}">`).join('') : ''}</div>
+        ${rejectInfo}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <h2 style="margin:0">${c.brand} ${c.model}</h2>
+            <span style="font-size:12px; color:var(--muted);">👁️ ${viewers.length}</span>
         </div>
-        ${c.phone ? `<a href="tel:${c.phone}" style="display:block; text-decoration:none; background:var(--success); color:#fff; text-align:center; padding:12px; border-radius:12px; margin-bottom:15px; font-weight:900;">📞 اتصال بالبائع</a>` : ''}
-        <p style="background:#222; padding:10px; border-radius:10px; font-size:13px">${c.notes || 'بدون ملاحظات'}</p>
-        <div style="margin-top:15px">${c.images.map(img => `<img src="${img}" style="width:100%; border-radius:15px; margin-bottom:10px;">`).join('')}</div>
+        <div class="detail-grid">
+            <div class="detail-box"><small>السعر</small><span style="color:var(--accent); font-weight:900">${c.price}</span></div>
+            <div class="detail-box"><small>الموديل</small><span>${c.model}</span></div>
+            <div class="detail-box"><small>اللون</small><span>${c.color || '-'}</span></div>
+            <div class="detail-box"><small>سنة الصنع</small><span>${c.year}</span></div>
+        </div>
+        <div style="text-align:center; margin-bottom:15px">
+            <small style="color:var(--muted); display:block; margin-bottom:5px">رقم الهاتف</small>
+            <a href="tel:${c.phone}" style="color:var(--success); text-decoration:none; font-size:18px; font-weight:900">📞 ${c.phone}</a>
+        </div>
+        <div style="background:#1a1a1a; padding:15px; border-radius:15px; margin-bottom:15px;">
+            <small style="color:var(--muted)">الوصف:</small>
+            <p style="margin:5px 0 0; font-size:13px">${c.notes || 'لا يوجد وصف'}</p>
+        </div>
         ${isOwner ? `
-            <button onclick="prepareEdit('${c.id}')" style="background:var(--gold); color:#000; width:100%; margin-bottom:10px; border-radius:12px; padding:14px; font-weight:800;">✏️ تعديل الإعلان</button>
+            <button onclick="prepareEdit('${c.id}')" style="background:var(--gold); color:#000; width:100%; margin-bottom:10px; border-radius:12px; padding:12px; font-weight:bold;">✏️ تعديل</button>
             <button onclick="deleteCar('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>
         ` : ''}
         <button onclick="closeDetails()" class="btn-primary">إغلاق</button>
@@ -247,92 +305,125 @@ function showDetails(id) {
     document.getElementById('details-modal').classList.add('active');
 }
 
-function deleteCar(id) {
-    if(confirm("هل أنت متأكد من حذف هذا الإعلان نهائياً؟")) {
-        db.ref('cars/' + id).remove().then(() => {
-            alert("تم الحذف بنجاح");
-            closeDetails();
-        });
-    }
-}
-
-function closeDetails() { document.getElementById('details-modal').classList.remove('active'); }
-function showAdminForm() { document.getElementById('admin-modal').classList.add('active'); }
-function hideAdminForm() { document.getElementById('admin-modal').classList.remove('active'); }
-
-function submitAdminForm() {
-    const age = parseInt(document.getElementById('adm-age').value);
-    if(age < 18) return alert("لا تكتمل العمر (يجب أن تكون 18 سنة أو أكثر)");
-    if(document.getElementById('adm-pass').value !== document.getElementById('adm-confirm').value) return alert("كلمات المرور غير متطابقة");
-    db.ref('admin_requests').push({ name: document.getElementById('adm-name').value, age: age, gender: document.getElementById('adm-gender').value, phone: document.getElementById('adm-phone').value, email: document.getElementById('adm-email').value, uid: auth.currentUser.uid }).then(() => { alert("تم الإرسال للإدارة"); hideAdminForm(); });
-}
-
-function switchTab(t) {
-    ['home', 'search', 'my-cars', 'profile'].forEach(v => document.getElementById(v + '-view').style.display = (v === t) ? 'block' : 'none');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(t==='home'?'الرئيسية':t==='search'?'بحث':t==='my-cars'?'سياراتي':'حسابي')));
+function switchTab(t, el) {
+    ['home', 'search', 'my-cars', 'profile'].forEach(v => {
+        const view = document.getElementById(v + '-view');
+        if(view) view.style.display = (v === t) ? 'block' : 'none';
+    });
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
 }
 
 function showAddModal() { 
-    editingId = null;
+    editingId = null; 
     document.getElementById('modal-title').innerText = "نشر إعلان جديد";
-    document.getElementById('upload-btn').innerText = "نشر الآن";
+    ['in-model', 'in-color', 'in-year', 'in-price', 'in-phone', 'in-notes', 'in-files'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
     document.getElementById('add-modal').classList.add('active'); 
 }
 
-function hideAddModal() { 
-    document.getElementById('add-modal').classList.remove('active'); 
-    document.getElementById('in-model').value = "";
-    document.getElementById('in-year').value = "";
-    document.getElementById('in-price').value = "";
-    document.getElementById('in-phone').value = "";
-    document.getElementById('in-notes').value = "";
-}
-
-function prepareEdit(id) {
-    const c = allCars.find(x => x.id === id);
-    if(!c) return;
-    editingId = id;
-    document.getElementById('modal-title').innerText = "تعديل الإعلان";
-    document.getElementById('in-brand').value = c.brand;
-    document.getElementById('in-model').value = c.model;
-    document.getElementById('in-year').value = c.year;
-    document.getElementById('in-price').value = c.price;
-    document.getElementById('in-phone').value = c.phone || "";
-    document.getElementById('in-cyl').value = c.cyl;
-    document.getElementById('in-notes').value = c.notes;
-    document.getElementById('upload-btn').innerText = "حفظ التعديلات";
-    closeDetails();
-    document.getElementById('add-modal').classList.add('active');
-}
+function hideAddModal() { document.getElementById('add-modal').classList.remove('active'); }
+function closeDetails() { document.getElementById('details-modal').classList.remove('active'); }
 
 async function uploadCar() {
-    const brand = document.getElementById('in-brand').value;
-    const model = document.getElementById('in-model').value;
-    const year = document.getElementById('in-year').value;
-    const price = document.getElementById('in-price').value;
-    const phone = document.getElementById('in-phone').value;
-    const cyl = document.getElementById('in-cyl').value;
-    const notes = document.getElementById('in-notes').value;
+    const btn = document.getElementById('upload-btn');
+    const originalText = btn.innerText;
+    btn.innerText = "جاري المعالجة...";
+    btn.disabled = true;
+    const carData = {
+        brand: document.getElementById('in-brand').value,
+        model: document.getElementById('in-model').value,
+        color: document.getElementById('in-color').value,
+        year: document.getElementById('in-year').value,
+        price: document.getElementById('in-price').value,
+        phone: document.getElementById('in-phone').value,
+        cyl: document.getElementById('in-cyl').value,
+        notes: document.getElementById('in-notes').value,
+        owner: auth.currentUser.uid,
+        status: 'pending'
+    };
     const files = document.getElementById('in-files').files;
-    
-    let carData = { brand, model, year, price, phone, cyl, notes, owner: auth.currentUser.uid, status: 'pending' };
-
-    if(editingId) {
-        if(files.length > 0) {
-            const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
-            carData.images = imgs;
-        } else {
-            const oldCar = allCars.find(x => x.id === editingId);
-            carData.images = oldCar.images;
+    if(files.length > 0) {
+        const imgs = [];
+        for(let f of files) {
+            const r = new FileReader();
+            const promise = new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); });
+            r.readAsDataURL(f);
+            await promise;
         }
-        db.ref('cars/' + editingId).update(carData).then(() => { alert("تم التحديث بنجاح"); hideAddModal(); });
-    } else {
-        if(files.length === 0) return alert("يرجى اختيار صور");
-        const imgs = []; for(let f of files) { const r = new FileReader(); r.readAsDataURL(f); await new Promise(res => r.onload = e => { imgs.push(e.target.result); res(); }); }
         carData.images = imgs;
-        db.ref('cars').push(carData).then(() => { alert("تم الإرسال بانتظار الموافقة"); hideAddModal(); });
+    } else if (editingId) {
+        const oldCar = allCars.find(x => x.id === editingId);
+        if(oldCar && oldCar.images) carData.images = oldCar.images;
+    }
+    if(editingId) {
+        db.ref('cars/' + editingId).update(carData).then(() => { 
+            alert("تم تحديث البيانات بنجاح"); 
+            hideAddModal(); 
+        });
+    } else {
+        db.ref('cars').push(carData).then(() => { 
+            alert("تم إرسال إعلانك للمراجعة بنجاح"); 
+            hideAddModal(); 
+        });
+    }
+    btn.innerText = originalText;
+    btn.disabled = false;
+}
+
+// تعديل وظيفة المصادقة
+function toggleAuthMode() {
+    isSignUp = !isSignUp;
+    document.getElementById('auth-title').innerText = isSignUp ? "إنشاء حساب" : "MJD CARS";
+    document.getElementById('auth-main-btn').innerText = isSignUp ? "تسجيل الحساب" : "دخول";
+    document.getElementById('auth-toggle').innerText = isSignUp ? "لديك حساب؟ سجل دخول" : "إنشاء حساب جديد";
+    
+    document.getElementById('signup-fields').style.display = isSignUp ? "block" : "none";
+    document.getElementById('confirm-pass-field').style.display = isSignUp ? "block" : "none";
+}
+
+function handleAuth() {
+    const e = document.getElementById('auth-email').value;
+    const p = document.getElementById('auth-pass').value;
+    
+    if(!e || !p) return alert("يرجى ملء كافة الحقول");
+
+    if(isSignUp) {
+        const name = document.getElementById('auth-name').value;
+        const age = document.getElementById('auth-age').value;
+        const phone = document.getElementById('auth-phone').value;
+        const pConfirm = document.getElementById('auth-pass-confirm').value;
+
+        if(!name || !age || !phone) return alert("يرجى إكمال كافة البيانات");
+        if(p !== pConfirm) return alert("كلمات المرور غير متطابقة");
+
+        auth.createUserWithEmailAndPassword(e, p)
+            .then((res) => {
+                // حفظ بيانات إضافية في القاعدة
+                db.ref('users/' + res.user.uid).set({
+                    name: name,
+                    age: age,
+                    phone: phone,
+                    email: e,
+                    role: 'user'
+                });
+                alert("تم إنشاء الحساب بنجاح");
+            })
+            .catch(err => alert("خطأ: " + err.message));
+    } else {
+        auth.signInWithEmailAndPassword(e, p)
+            .catch(err => alert("خطأ: " + err.message));
     }
 }
+
+window.onclick = function(event) {
+    const addModal = document.getElementById('add-modal');
+    const detailsModal = document.getElementById('details-modal');
+    if (event.target == addModal) hideAddModal();
+    if (event.target == detailsModal) closeDetails();
+}
 </script>
+
 </body>
 </html>
