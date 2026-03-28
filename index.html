@@ -12,7 +12,7 @@
 <style>
 :root { --bg: #050505; --fg: #ffffff; --muted: #a0a0a0; --accent: #007aff; --card: #121212; --border: #252525; --danger: #ff3b30; --success: #34c759; --gold: #d4af37; }
 * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; overflow-x: hidden; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; overflow-x: hidden; font-size: 16px; } /* أضفت حجم خط افتراضي */
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -121,6 +121,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
                 <h3 id="user-display-email"></h3>
                 <div id="user-uid-box" style="font-size:11px; color:var(--accent); font-family:monospace;"></div>
             </div>
+            <div class="menu-item" onclick="showSettingsModal()"><span>⚙️ الإعدادات</span><small>تغيير مظهر وحجم التطبيق</small></div>
             <div class="menu-item" onclick="location.href='mailto:amjedfleh3@gmail.com'"><span>📧 مساعدة</span><small>تواصل معنا عبر البريد</small></div>
             <div class="menu-item" onclick="window.open('https://carsiq.netlify.app', '_blank')"><span>🌐 الموقع الإلكتروني</span><small>زيارة موقعنا الرسمي</small></div>
             <div class="menu-item" onclick="showAdminForm()"><span>🛡️ التقديم للإدارة</span><small>أرسل طلب انضمام لفريق العمل</small></div>
@@ -138,6 +139,19 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 </div>
 
 <div id="details-modal" class="overlay"><div class="modal" id="details-content"></div></div>
+
+<div id="settings-modal" class="overlay" style="align-items: center;">
+    <div class="confirm-box">
+        <h3 style="margin-top:0">إعدادات العرض</h3>
+        <p style="color:var(--muted); font-size:14px;">تحكم في حجم خط التطبيق</p>
+        <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0;">
+            <button onclick="changeFontSize(-1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">-</button>
+            <span id="font-size-label" style="font-weight:bold; font-size:18px;">16px</span>
+            <button onclick="changeFontSize(1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">+</button>
+        </div>
+        <button onclick="hideSettingsModal()" class="btn-primary">حفظ وإغلاق</button>
+    </div>
+</div>
 
 <div id="delete-confirm-modal" class="overlay" style="align-items: center;">
     <div class="confirm-box">
@@ -208,6 +222,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.database();
 let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null, carToDelete = null;
+
+// دوال الإعدادات الجديدة
+let currentFontSize = 16;
+function showSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }
+function hideSettingsModal() { document.getElementById('settings-modal').classList.remove('active'); }
+function changeFontSize(delta) {
+    currentFontSize = Math.max(12, Math.min(22, currentFontSize + delta));
+    document.body.style.fontSize = currentFontSize + "px";
+    document.getElementById('font-size-label').innerText = currentFontSize + "px";
+}
 
 auth.onAuthStateChanged(user => {
     if(user) {
@@ -440,7 +464,6 @@ async function uploadCar() {
     btn.disabled = false;
 }
 
-// وظائف التقديم للإدارة المحدثة
 function showAdminForm() {
     const uid = auth.currentUser.uid;
     const btn = document.getElementById('adm-btn');
