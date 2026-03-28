@@ -21,6 +21,9 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 .btn-primary { background: var(--accent); color: #fff; width: 100%; }
 .btn-danger { background: var(--danger); color: #fff; width: 100%; }
 
+.error-msg { color: var(--danger); font-size: 12px; margin-top: -8px; margin-bottom: 10px; display: none; text-align: right; font-weight: bold; }
+.success-msg { color: var(--success); font-size: 13px; margin-bottom: 15px; display: none; text-align: center; font-weight: bold; }
+
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
 .card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); overflow: hidden; cursor: pointer; position: relative; }
 .card img { width: 100%; height: 140px; object-fit: cover; }
@@ -28,16 +31,13 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 .card-price { color: var(--accent); font-weight: 900; font-size: 14px; }
 .status-badge { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: 900; color: #fff; z-index: 5; }
 
-/* Modal & Full Screen Panel */
 .overlay { position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.85); z-index: 2000; }
 .overlay.active { display: flex; animation: slideUp 0.3s ease; }
 .modal { background: #1c1c1e; width: 100%; max-width: 500px; padding: 25px; border-radius: 30px 30px 0 0; max-height: 90vh; overflow-y: auto; }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-/* Full Screen Add Panel With Blue Border */
-#add-modal .modal { height: 100vh; max-height: 100vh; border-radius: 0; border: 1px solid var(--accent); width: 100vw; max-width: 100vw; }
+#add-modal .modal, #admin-modal .modal { height: 100vh; max-height: 100vh; border-radius: 0; border: 1px solid var(--accent); width: 100vw; max-width: 100vw; }
 
-/* Photo Slider */
 .photo-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin-bottom: 15px; scrollbar-width: none; }
 .photo-slider::-webkit-scrollbar { display: none; }
 .photo-slider img { flex: 0 0 100%; width: 100%; height: 250px; object-fit: cover; border-radius: 15px; scroll-snap-align: start; }
@@ -54,10 +54,11 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 .menu-item small { color: var(--muted); font-size: 11px; }
 .vip-badge { color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 5px; font-size: 10px; }
 
-/* Detail Grid Layout */
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
 .detail-box { background: #222; padding: 10px; border-radius: 12px; text-align: center; }
 .detail-box small { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }
+
+.confirm-box { background: #1c1c1e; padding: 25px; border-radius: 25px; text-align: center; border: 1px solid var(--border); width: 90%; max-width: 320px; }
 </style>
 </head>
 <body>
@@ -79,6 +80,9 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
             <div id="confirm-pass-field" style="display: none;">
                 <input type="password" id="auth-pass-confirm" placeholder="تأكيد كلمة المرور">
             </div>
+
+            <div id="auth-error" class="error-msg">خطأ في البيانات، يرجى المحاولة مرة أخرى</div>
+            <div id="auth-success" class="success-msg">تمت العملية بنجاح! جارِ التحميل...</div>
 
             <button onclick="handleAuth()" class="btn-primary" id="auth-main-btn" style="margin-top:10px">دخول</button>
             <p onclick="toggleAuthMode()" id="auth-toggle" style="margin-top:20px; font-size:13px; color:var(--accent); cursor:pointer;">إنشاء حساب جديد</p>
@@ -135,6 +139,15 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 
 <div id="details-modal" class="overlay"><div class="modal" id="details-content"></div></div>
 
+<div id="delete-confirm-modal" class="overlay" style="align-items: center;">
+    <div class="confirm-box">
+        <h3 style="margin-top:0">تأكيد الحذف</h3>
+        <p style="color:var(--muted); font-size:14px;">هل أنت متأكد من حذف هذا الإعلان نهائياً؟ لا يمكن التراجع.</p>
+        <button id="confirm-delete-btn" class="btn-danger" style="margin-bottom:10px;">نعم، حذف</button>
+        <button onclick="hideDeleteModal()" style="background:none; color:var(--fg); width:100%">إلغاء</button>
+    </div>
+</div>
+
 <div id="add-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);">
     <div class="modal">
         <h3 id="modal-title">نشر إعلان جديد</h3>
@@ -149,8 +162,35 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
         <select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option><option value="12">12 سلندر</option><option value="EV">كهربائية</option></select>
         <textarea id="in-notes" rows="3" placeholder="ملاحظات إضافية"></textarea>
         <input type="file" id="in-files" multiple accept="image/*">
+        
+        <div id="upload-error" class="error-msg">يرجى التحقق من كافة الحقول</div>
+        <div id="upload-success" class="success-msg">تم الإرسال بنجاح!</div>
+
         <button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button>
         <button onclick="hideAddModal()" style="width:100%; background:none; color:#fff">إلغاء</button>
+    </div>
+</div>
+
+<div id="admin-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);">
+    <div class="modal">
+        <h3>طلب انضمام للإدارة</h3>
+        <div id="adm-status-banner" style="display:none; padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px; text-align:center;"></div>
+        <p id="adm-desc" style="color:var(--muted); font-size:13px; margin-bottom:20px;">يرجى ملء البيانات التالية بدقة وسيتم مراجعة طلبك</p>
+        
+        <div id="adm-form-fields">
+            <input type="text" id="adm-name" placeholder="الاسم الكامل">
+            <input type="number" id="adm-age" placeholder="العمر">
+            <input type="tel" id="adm-phone" placeholder="رقم الهاتف">
+            <input type="email" id="adm-email" placeholder="البريد الإلكتروني">
+            <input type="password" id="adm-pass" placeholder="كلمة السر">
+            <input type="password" id="adm-pass-confirm" placeholder="تأكيد كلمة السر">
+        </div>
+        
+        <div id="adm-error" class="error-msg"></div>
+        <div id="adm-success" class="success-msg">تم إرسال طلبك بنجاح!</div>
+
+        <button onclick="submitAdminRequest()" class="btn-primary" id="adm-btn">إرسال الطلب</button>
+        <button onclick="hideAdminModal()" style="width:100%; background:none; color:#fff">إلغاء</button>
     </div>
 </div>
 
@@ -167,7 +207,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.database();
-let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null;
+let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null, carToDelete = null;
 
 auth.onAuthStateChanged(user => {
     if(user) {
@@ -184,6 +224,20 @@ auth.onAuthStateChanged(user => {
         document.getElementById('bottom-nav').style.display = 'none';
     }
 });
+
+function showError(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.innerText = message;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+function showSuccess(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.innerText = message;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
 
 function loadData() {
     db.ref('cars').on('value', snap => {
@@ -238,14 +292,24 @@ function setFilter(f, el) {
     runSearch();
 }
 
-function deleteCar(id) {
-    if(confirm("هل أنت متأكد من حذف هذا الإعلان نهائياً؟")) {
-        db.ref('cars/' + id).remove().then(() => {
+function showDeleteModal(id) {
+    carToDelete = id;
+    document.getElementById('delete-confirm-modal').classList.add('active');
+}
+
+function hideDeleteModal() {
+    document.getElementById('delete-confirm-modal').classList.remove('active');
+    carToDelete = null;
+}
+
+document.getElementById('confirm-delete-btn').onclick = function() {
+    if(carToDelete) {
+        db.ref('cars/' + carToDelete).remove().then(() => {
+            hideDeleteModal();
             closeDetails();
-            alert("تم حذف الإعلان بنجاح");
         });
     }
-}
+};
 
 function prepareEdit(id) {
     const c = allCars.find(x => x.id === id);
@@ -298,7 +362,7 @@ function showDetails(id) {
         </div>
         ${isOwner ? `
             <button onclick="prepareEdit('${c.id}')" style="background:var(--gold); color:#000; width:100%; margin-bottom:10px; border-radius:12px; padding:12px; font-weight:bold;">✏️ تعديل</button>
-            <button onclick="deleteCar('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>
+            <button onclick="showDeleteModal('${c.id}')" class="btn-danger" style="margin-bottom:10px;">🗑️ حذف الإعلان</button>
         ` : ''}
         <button onclick="closeDetails()" class="btn-primary">إغلاق</button>
     `;
@@ -329,6 +393,10 @@ function closeDetails() { document.getElementById('details-modal').classList.rem
 async function uploadCar() {
     const btn = document.getElementById('upload-btn');
     const originalText = btn.innerText;
+    if(!document.getElementById('in-model').value || !document.getElementById('in-price').value || !document.getElementById('in-phone').value) {
+        showError('upload-error', "يرجى ملء الحقول الأساسية (الموديل، السعر، الهاتف)");
+        return;
+    }
     btn.innerText = "جاري المعالجة...";
     btn.disabled = true;
     const carData = {
@@ -359,26 +427,107 @@ async function uploadCar() {
     }
     if(editingId) {
         db.ref('cars/' + editingId).update(carData).then(() => { 
-            alert("تم تحديث البيانات بنجاح"); 
-            hideAddModal(); 
-        });
+            showSuccess('upload-success', "تم تحديث البيانات بنجاح"); 
+            setTimeout(hideAddModal, 1500);
+        }).catch(err => showError('upload-error', "خطأ في التحديث: " + err.message));
     } else {
         db.ref('cars').push(carData).then(() => { 
-            alert("تم إرسال إعلانك للمراجعة بنجاح"); 
-            hideAddModal(); 
-        });
+            showSuccess('upload-success', "تم إرسال إعلانك للمراجعة بنجاح"); 
+            setTimeout(hideAddModal, 2000);
+        }).catch(err => showError('upload-error', "فشل في النشر: " + err.message));
     }
     btn.innerText = originalText;
     btn.disabled = false;
 }
 
-// تعديل وظيفة المصادقة
+// وظائف التقديم للإدارة المحدثة
+function showAdminForm() {
+    const uid = auth.currentUser.uid;
+    const btn = document.getElementById('adm-btn');
+    const banner = document.getElementById('adm-status-banner');
+    const formFields = document.getElementById('adm-form-fields');
+    const desc = document.getElementById('adm-desc');
+    
+    document.getElementById('admin-modal').classList.add('active');
+    banner.style.display = 'none';
+    formFields.style.display = 'block';
+    desc.style.display = 'block';
+    btn.style.display = 'block';
+    btn.innerText = "إرسال الطلب";
+
+    db.ref('admin_requests').orderByChild('uid').equalTo(uid).once('value', snapshot => {
+        let lastReq = null;
+        snapshot.forEach(child => { lastReq = child.val(); });
+
+        if(lastReq) {
+            if(lastReq.status === 'pending') {
+                banner.style.display = 'block';
+                banner.style.background = 'orange';
+                banner.innerText = "⏳ طلبك قيد المراجعة حالياً. يرجى الانتظار.";
+                formFields.style.display = 'none';
+                desc.style.display = 'none';
+                btn.style.display = 'none';
+            } else if(lastReq.status === 'rejected') {
+                banner.style.display = 'block';
+                banner.style.background = 'var(--danger)';
+                banner.innerText = "❌ تم رفض طلبك. السبب: " + (lastReq.rejectReason || "غير محدد");
+                btn.innerText = "إعادة التقديم (تحديث البيانات)";
+            } else if(lastReq.status === 'approved') {
+                banner.style.display = 'block';
+                banner.style.background = 'var(--success)';
+                banner.innerText = "✅ تم قبولك كمسؤول في النظام!";
+                formFields.style.display = 'none';
+                desc.style.display = 'none';
+                btn.style.display = 'none';
+            }
+        }
+    });
+}
+
+function hideAdminModal() {
+    document.getElementById('admin-modal').classList.remove('active');
+}
+
+function submitAdminRequest() {
+    const uid = auth.currentUser.uid;
+    const name = document.getElementById('adm-name').value;
+    const age = document.getElementById('adm-age').value;
+    const phone = document.getElementById('adm-phone').value;
+    const email = document.getElementById('adm-email').value;
+    const pass = document.getElementById('adm-pass').value;
+    const passC = document.getElementById('adm-pass-confirm').value;
+
+    if(!name || !age || !phone || !email || !pass) return showError('adm-error', "يرجى ملء جميع الحقول");
+    if(pass !== passC) return showError('adm-error', "كلمات السر غير متطابقة");
+
+    const btn = document.getElementById('adm-btn');
+    btn.disabled = true;
+    btn.innerText = "جاري الإرسال...";
+
+    db.ref('admin_requests').orderByChild('uid').equalTo(uid).once('value', snapshot => {
+        let existingKey = null;
+        snapshot.forEach(child => { existingKey = child.key; });
+
+        const reqData = {
+            uid: uid, name: name, age: age, phone: phone, 
+            email: email, password: pass, status: 'pending', timestamp: Date.now()
+        };
+
+        const targetRef = existingKey ? db.ref('admin_requests/' + existingKey) : db.ref('admin_requests').push();
+        
+        targetRef.set(reqData).then(() => {
+            showSuccess('adm-success', "تم إرسال طلبك بنجاح");
+            setTimeout(hideAdminModal, 2000);
+        }).catch(err => showError('adm-error', "خطأ: " + err.message))
+        .finally(() => { btn.disabled = false; });
+    });
+}
+
 function toggleAuthMode() {
     isSignUp = !isSignUp;
     document.getElementById('auth-title').innerText = isSignUp ? "إنشاء حساب" : "MJD CARS";
     document.getElementById('auth-main-btn').innerText = isSignUp ? "تسجيل الحساب" : "دخول";
     document.getElementById('auth-toggle').innerText = isSignUp ? "لديك حساب؟ سجل دخول" : "إنشاء حساب جديد";
-    
     document.getElementById('signup-fields').style.display = isSignUp ? "block" : "none";
     document.getElementById('confirm-pass-field').style.display = isSignUp ? "block" : "none";
 }
@@ -386,44 +535,38 @@ function toggleAuthMode() {
 function handleAuth() {
     const e = document.getElementById('auth-email').value;
     const p = document.getElementById('auth-pass').value;
-    
-    if(!e || !p) return alert("يرجى ملء كافة الحقول");
-
+    if(!e || !p) return showError('auth-error', "يرجى إدخال البريد الإلكتروني وكلمة المرور");
     if(isSignUp) {
         const name = document.getElementById('auth-name').value;
         const age = document.getElementById('auth-age').value;
         const phone = document.getElementById('auth-phone').value;
         const pConfirm = document.getElementById('auth-pass-confirm').value;
-
-        if(!name || !age || !phone) return alert("يرجى إكمال كافة البيانات");
-        if(p !== pConfirm) return alert("كلمات المرور غير متطابقة");
-
+        if(!name || !age || !phone) return showError('auth-error', "يرجى إكمال كافة البيانات الشخصية");
+        if(p !== pConfirm) return showError('auth-error', "كلمات المرور غير متطابقة");
         auth.createUserWithEmailAndPassword(e, p)
             .then((res) => {
-                // حفظ بيانات إضافية في القاعدة
                 db.ref('users/' + res.user.uid).set({
-                    name: name,
-                    age: age,
-                    phone: phone,
-                    email: e,
-                    role: 'user'
+                    name: name, age: age, phone: phone, email: e, role: 'user'
                 });
-                alert("تم إنشاء الحساب بنجاح");
+                showSuccess('auth-success', "تم إنشاء الحساب بنجاح!");
             })
-            .catch(err => alert("خطأ: " + err.message));
+            .catch(err => {
+                let msg = "حدث خطأ أثناء التسجيل";
+                if(err.code === 'auth/email-already-in-use') msg = "هذا البريد مستخدم بالفعل";
+                showError('auth-error', msg);
+            });
     } else {
-        auth.signInWithEmailAndPassword(e, p)
-            .catch(err => alert("خطأ: " + err.message));
+        auth.signInWithEmailAndPassword(e, p).catch(err => {
+            showError('auth-error', "خطأ في البريد أو كلمة المرور");
+        });
     }
 }
 
 window.onclick = function(event) {
-    const addModal = document.getElementById('add-modal');
-    const detailsModal = document.getElementById('details-modal');
-    if (event.target == addModal) hideAddModal();
-    if (event.target == detailsModal) closeDetails();
+    if (event.target.classList.contains('overlay')) {
+        event.target.classList.remove('active');
+    }
 }
 </script>
-
 </body>
 </html>
