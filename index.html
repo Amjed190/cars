@@ -62,7 +62,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
   
 .confirm-box { background: #1c1c1e; padding: 25px; border-radius: 25px; text-align: center; border: 1px solid var(--border); width: 90%; max-width: 320px; }  
   
-/* AI Chat Style - تم التعديل بملء الشاشة وإطار أزرق */  
+/* AI Chat Style */  
 .floating-help-btn { position: fixed; bottom: 100px; left: 20px; width: 55px; height: 55px; background: var(--accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 15px rgba(0,122,255,0.4); z-index: 2500; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; }  
 .floating-help-btn:active { transform: scale(0.9); }  
   
@@ -76,7 +76,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
     flex-direction: column;   
     padding: 0;   
     background: #000;   
-    border: 2px solid var(--accent); /* الإطار الأزرق الصغير */  
+    border: 2px solid var(--accent);   
 }  
   
 .chat-header {   
@@ -116,7 +116,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
         </div>  
     </div>  
 </div>  <div id="main-app" style="display: none;">  
-    <div class="floating-help-btn" onclick="openAIChat()">AI</div>  
+    <div class="floating-help-btn" onclick="openAIChat()"></div>  
     <div class="container">  
         <div id="home-view">  
             <h2 style="font-weight: 900;">اكتشف الأفضل 🚗</h2>  
@@ -177,7 +177,7 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 <div id="settings-modal" class="overlay" style="align-items: center;"><div class="confirm-box"><h3 style="margin-top:0">إعدادات العرض</h3><p style="color:var(--muted); font-size:14px;">تحكم في حجم خط التطبيق</p><div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0;"><button onclick="changeFontSize(-1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">-</button><span id="font-size-label" style="font-weight:bold; font-size:18px;">16px</span><button onclick="changeFontSize(1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">+</button></div><button onclick="hideSettingsModal()" class="btn-primary">حفظ وإغلاق</button></div></div>  
 <div id="delete-confirm-modal" class="overlay" style="align-items: center;"><div class="confirm-box"><h3 style="margin-top:0">تأكيد الحذف</h3><p style="color:var(--muted); font-size:14px;">هل أنت متأكد من حذف هذا الإعلان نهائياً؟ لا يمكن التراجع.</p><button id="confirm-delete-btn" class="btn-danger" style="margin-bottom:10px;">نعم، حذف</button><button onclick="hideDeleteModal()" style="background:none; color:var(--fg); width:100%">إلغاء</button></div></div>  
 <div id="add-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3 id="modal-title">نشر إعلان جديد</h3><select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES-BENZ</option><option>ROLLS-ROYCE</option><option>RAM</option><option>LEXUS</option><option>FORD</option><option>CHEVROLET</option><option>GMC</option><option>KIA</option><option>HYUNDAI</option><option>DODGE</option><option>NISSAN</option></select><input type="text" id="in-model" placeholder="الموديل"><input type="text" id="in-color" placeholder="اللون"><input type="number" id="in-year" placeholder="سنة الصنع"><input type="text" id="in-price" placeholder="السعر"><input type="tel" id="in-phone" placeholder="رقم الهاتف"><select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option><option value="12">12 سلندر</option><option value="EV">كهربائية</option></select><textarea id="in-notes" rows="3" placeholder="ملاحظات إضافية"></textarea><input type="file" id="in-files" multiple accept="image/*"><div id="upload-error" class="error-msg">يرجى التحقق من كافة الحقول</div><div id="upload-success" class="success-msg">تم الإرسال بنجاح!</div><button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button><button onclick="hideAddModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  
-<div id="admin-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3>طلب انضمام للإدارة</h3><div id="adm-status-banner" style="display:none; padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px; text-align:center;"></div><p id="adm-desc" style="color:var(--muted); font-size:13px; margin-bottom:20px;">يرجى ملء البيانات التالية بدقة وسيتم مراجعة طلبك</p><div id="adm-form-fields"><input type="text" id="adm-name" placeholder="الاسم الكامل"><input type="number" id="adm-age" placeholder="العمر"><input type="tel" id="adm-phone" placeholder="رقم الهاتف"><input type="email" id="adm-email" placeholder="البريد الإلكتروني"><input type="password" id="adm-pass" placeholder="كلمة السر"><input type="password" id="adm-pass-confirm" placeholder="تأكيد كلمة السر"></div><div id="adm-error" class="error-msg"></div><div id="adm-success" class="success-msg">تم إرسال طلبك بنجاح!</div><button onclick="submitAdminRequest()" class="btn-primary" id="adm-btn">إرسال الطلب</button><button onclick="hideAdminModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  <script>  
+<div id="admin-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3>طلب انضمام للإدارة</h3><div id="adm-status-banner" style="display:none; padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px; text-align:center;"></div><p id="adm-desc" style="color:var(--muted); font-size:13px; margin-bottom:20px;">يرجى ملء البيانات التالية بدقة وسيتم مراجعة طلبك</p><div id="adm-form-fields"><input type="text" id="adm-name" placeholder="الاسم الكامل"><input type="number" id="adm-age" placeholder="العمر"><input type="tel" id="adm-phone" placeholder="رقم الهاتف"><input type="email" id="adm-email" placeholder="البريد الإلكتروني"><input type="password" id="adm-pass" placeholder="كلمة السر"><input type="password" id="adm-pass-confirm" placeholder="تأكيد كلمة السر"></div><div id="adm-error" class="error-msg" style="display: none;"></div><div id="adm-success" class="success-msg" style="display: none;">تم إرسال طلبك بنجاح!</div><button onclick="submitAdminRequest()" class="btn-primary" id="adm-btn">إرسال الطلب</button><button onclick="hideAdminModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  <script>  
 const firebaseConfig = {  
   apiKey: "AIzaSyDQC-h8a1CFBeXISxJnJjYrWTw3lH00dgU",  
   authDomain: "nickname-701a2.firebaseapp.com",  
@@ -193,111 +193,76 @@ const auth = firebase.auth(), db = firebase.database();
 let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null, carToDelete = null;  
 let currentUserName = "المستخدم";  
   
-// AI Chat Advanced Logic  
-
-// AI Chat Advanced Logic (Protected Version)
-
-// 🔒 تشفير بسيط للمفتاح (Base64)
+// AI Chat Advanced Logic (Modified to recognize app cars)
 const _k = "c2stb3ItdjEtZWE0ODQ0MTYyNTFlZjM5OGZkOWRkMjlkZmEyNDllZTMwNjM3YjJhMWYzMzMwNWQ3ZTNmY2Y3ODI0MmZmZTlmNA==";
 const OPENROUTER_API_KEY = atob(_k);
+const MODELS = ["openai/gpt-3.5-turbo", "google/gemini-2.0-flash-lite-001"];
+let chatContext = [];
 
-// 🔄 موديلات احتياطية (fallback)
-const MODELS = [
-    "openai/gpt-3.5-turbo",
-    "mistralai/mistral-7b-instruct",
-    "google/gemini-2.0-flash-lite-001"
-];
-
-let chatContext = [
-    { role: "system", content: "أنت مساعد ذكي لتطبيق MJD Cars لبيع السيارات. أجب بأسلوب تقني وودود باللغة العربية." }
-];
+function clearChatHistory(withAlert) {
+    if(withAlert && !confirm("هل تريد مسح سجل المحادثة؟")) return;
+    chatContext = [{ role: "system", content: "أنت مساعد ذكي لتطبيق MJD Cars لبيع السيارات. أجب بأسلوب تقني وودود باللغة العربية." }];
+    document.getElementById('chat-messages').innerHTML = `<div class="msg ai">مرحباً ${currentUserName}! كيف يمكنني مساعدتك في MJD Cars اليوم؟</div>`;
+}
 
 async function sendToAI() {
     const inputEl = document.getElementById('chat-user-input');
     const msgArea = document.getElementById('chat-messages');
     const text = inputEl.value.trim();
     if (!text) return;
-
     inputEl.value = "";
     msgArea.innerHTML += `<div class="msg user">${text}</div>`;
-    chatContext.push({ role: "user", content: text });
-    msgArea.scrollTop = msgArea.scrollHeight;
+    
+    // بناء سياق بيانات السيارات للذكاء الاصطناعي
+    const carsDataSummary = allCars.filter(c => c.status === 'approved').map(c => 
+        `ماركة: ${c.brand}, موديل: ${c.model}, سعر: ${c.price}, سنة: ${c.year}, كود ADID: ${c.adid}, لون: ${c.color || 'غير محدد'}`
+    ).join(' | ');
 
+    const contextWithCars = [
+        { role: "system", content: `أنت مساعد MJD Cars. لديك وصول لهذه السيارات المعروضة حالياً: ${carsDataSummary}. إذا سألك المستخدم عن سيارة، ابحث في هذه القائمة وأعطه التفاصيل. إذا طلب ADID، أعطه إياه من القائمة.` },
+        ...chatContext,
+        { role: "user", content: text }
+    ];
+
+    msgArea.scrollTop = msgArea.scrollHeight;
     const loadingId = "ai-loading-" + Date.now();
     msgArea.innerHTML += `<div class="msg ai" id="${loadingId}"><i class="fas fa-spinner fa-spin"></i> جاري التفكير...</div>`;
-
+    
     let success = false;
-    let lastError = "";
-
-    // 🔁 تجربة أكثر من موديل تلقائياً
     for (let model of MODELS) {
         try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
-
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
-                signal: controller.signal,
-                headers: {
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: chatContext
-                })
+                headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ model: model, messages: contextWithCars })
             });
-
-            clearTimeout(timeout);
-
-            if (!response.ok) {
-                lastError = "HTTP " + response.status;
-                continue;
-            }
-
+            if (!response.ok) continue;
             const data = await response.json();
-
             if (data.choices && data.choices[0]) {
                 const aiMsg = data.choices[0].message.content;
+                chatContext.push({ role: "user", content: text });
                 chatContext.push({ role: "assistant", content: aiMsg });
                 document.getElementById(loadingId).innerText = aiMsg;
-                success = true;
-                break;
-            } else {
-                lastError = "No choices";
+                success = true; break;
             }
-
-        } catch (e) {
-            lastError = e.message;
-        }
+        } catch (e) { console.error(e); }
     }
-
-    if (!success) {
-        document.getElementById(loadingId).innerText =
-            "⚠️ تعذر الاتصال بالذكاء الاصطناعي حالياً، حاول مرة أخرى لاحقاً.\n(" + lastError + ")";
-    }
-
+    if (!success) document.getElementById(loadingId).innerText = "⚠️ عذراً، حدث خطأ في الاتصال.";
     msgArea.scrollTop = msgArea.scrollHeight;
 }
-    // ✅ فتح الشات
-function openAIChat() {
-    const modal = document.getElementById('ai-chat-modal');
-    if (!modal) return;
 
-    modal.classList.add('active');
-    document.body.classList.add('modal-open');
+function openAIChat() { document.getElementById('ai-chat-modal').classList.add('active'); document.body.classList.add('modal-open'); }
+function closeAIChat() { document.getElementById('ai-chat-modal').classList.remove('active'); document.body.classList.remove('modal-open'); }
+
+// ADID Generator
+function generateADID() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+    return result;
 }
 
-// ✅ إغلاق الشات
-function closeAIChat() {
-    const modal = document.getElementById('ai-chat-modal');
-    if (!modal) return;
-
-    modal.classList.remove('active');
-    document.body.classList.remove('modal-open');
-}
-  
-// Settings logic  
+// Settings & Auth logic
 let currentFontSize = 16;  
 function showSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }  
 function hideSettingsModal() { document.getElementById('settings-modal').classList.remove('active'); }  
@@ -306,21 +271,15 @@ function changeFontSize(delta) {
     document.body.style.fontSize = currentFontSize + "px";  
     document.getElementById('font-size-label').innerText = currentFontSize + "px";  
 }  
-  
-function signOutWithClearChat() {  
-    clearChatHistory(false); // مسح الدردشة برمجياً بدون تنبيه  
-    auth.signOut();  
-}  
-  
+function signOutWithClearChat() { clearChatHistory(false); auth.signOut(); }  
+
 auth.onAuthStateChanged(user => {  
     if(user) {  
-        // جلب اسم المستخدم من قاعدة البيانات  
         db.ref('users/' + user.uid).once('value').then(snapshot => {  
             const data = snapshot.val();  
             currentUserName = (data && data.name) ? data.name : "المستخدم";  
-            clearChatHistory(false); // تجهيز الرسالة الترحيبية بالاسم  
+            clearChatHistory(false);
         });  
-  
         document.getElementById('auth-view').style.display = 'none';  
         document.getElementById('main-app').style.display = 'block';  
         document.getElementById('bottom-nav').style.display = 'flex';  
@@ -334,18 +293,6 @@ auth.onAuthStateChanged(user => {
         document.getElementById('bottom-nav').style.display = 'none';  
     }  
 });  
-  
-function showError(elementId, message) {  
-    const el = document.getElementById(elementId);  
-    el.innerText = message; el.style.display = 'block';  
-    setTimeout(() => { el.style.display = 'none'; }, 5000);  
-}  
-  
-function showSuccess(elementId, message) {  
-    const el = document.getElementById(elementId);  
-    el.innerText = message; el.style.display = 'block';  
-    setTimeout(() => { el.style.display = 'none'; }, 4000);  
-}  
   
 function loadData() {  
     db.ref('cars').on('value', snap => {  
@@ -382,9 +329,7 @@ function runSearch() {
     } else if(currentFilter === 'cheap') {  
         filtered = filtered.filter(c => parseInt(c.price.replace(/[^0-9]/g, '')) < 15000);  
     }  
-    if(query) {  
-        filtered = filtered.filter(c => c.brand.toLowerCase().includes(query) || c.model.toLowerCase().includes(query));  
-    }  
+    if(query) filtered = filtered.filter(c => c.brand.toLowerCase().includes(query) || c.model.toLowerCase().includes(query) || (c.adid && c.adid.toLowerCase().includes(query)));  
     document.getElementById('search-results').innerHTML = filtered.map(c => carCard(c)).join('') || "<p style='text-align:center; grid-column: 1/-1;'>لا توجد نتائج</p>";  
 }  
   
@@ -403,18 +348,39 @@ function showDetails(id) {
     document.getElementById('details-content').innerHTML = `  
         <div class="photo-slider">${c.images ? c.images.map(img => `<img src="${img}">`).join('') : ''}</div>  
         <div style="display:flex; justify-content:space-between; align-items:center;"><h2>${c.brand} ${c.model}</h2><span>👁️ ${viewers.length}</span></div>  
+        <p style="font-size:11px; color:var(--muted); margin-top:-10px;">ADID: ${c.adid || 'N/A'}</p>
         <div class="detail-grid">  
             <div class="detail-box"><small>السعر</small><b>${c.price}</b></div>  
             <div class="detail-box"><small>الموديل</small><b>${c.model}</b></div>  
             <div class="detail-box"><small>اللون</small><b>${c.color || '-'}</b></div>  
-            <div class="detail-box"><small>السنة</small><b>${c.year}</b></div>  
+            <div class="detail-box"><small>سنة الصنع</small><b>${c.year}</b></div>  
         </div>  
         <a href="tel:${c.phone}" style="display:block; text-align:center; background:var(--success); color:#fff; padding:15px; border-radius:12px; text-decoration:none; font-weight:900; margin-bottom:10px;">اتصال 📞</a>  
-        ${isOwner ? `<button onclick="showDeleteModal('${c.id}')" class="btn-danger">حذف الإعلان</button>` : ''}  
+        ${isOwner ? `
+            <button onclick="editCar('${c.id}')" class="btn-primary" style="margin-bottom:10px; background:#555;">تعديل الإعلان ✏️</button>
+            <button onclick="showDeleteModal('${c.id}')" class="btn-danger">حذف الإعلان 🗑️</button>
+        ` : ''}  
         <button onclick="closeDetails()" class="btn-primary" style="margin-top:10px">إغلاق</button>  
     `;  
     document.getElementById('details-modal').classList.add('active');  
 }  
+
+function editCar(id) {
+    const c = allCars.find(x => x.id === id);
+    if(!c) return;
+    editingId = id;
+    document.getElementById('modal-title').innerText = "تعديل الإعلان";
+    document.getElementById('in-brand').value = c.brand;
+    document.getElementById('in-model').value = c.model;
+    document.getElementById('in-color').value = c.color;
+    document.getElementById('in-year').value = c.year;
+    document.getElementById('in-price').value = c.price;
+    document.getElementById('in-phone').value = c.phone;
+    document.getElementById('in-notes').value = c.notes || "";
+    document.getElementById('upload-btn').innerText = "حفظ التعديلات";
+    closeDetails();
+    document.getElementById('add-modal').classList.add('active');
+}
   
 function switchTab(t, el) {  
     ['home', 'search', 'my-cars', 'profile'].forEach(v => {  
@@ -425,7 +391,12 @@ function switchTab(t, el) {
     el.classList.add('active');  
 }  
   
-function showAddModal() { editingId = null; document.getElementById('add-modal').classList.add('active'); }  
+function showAddModal() { 
+    editingId = null; 
+    document.getElementById('modal-title').innerText = "نشر إعلان جديد";
+    document.getElementById('upload-btn').innerText = "نشر الآن";
+    document.getElementById('add-modal').classList.add('active'); 
+}  
 function hideAddModal() { document.getElementById('add-modal').classList.remove('active'); }  
 function closeDetails() { document.getElementById('details-modal').classList.remove('active'); }  
 function showDeleteModal(id) { carToDelete = id; document.getElementById('delete-confirm-modal').classList.add('active'); }  
@@ -434,6 +405,70 @@ function hideDeleteModal() { document.getElementById('delete-confirm-modal').cla
 document.getElementById('confirm-delete-btn').onclick = function() {  
     if(carToDelete) db.ref('cars/' + carToDelete).remove().then(() => { hideDeleteModal(); closeDetails(); });  
 };  
+
+// قسم التقديم للإدارة - تفعيل الوظائف
+function showAdminForm() {
+    document.getElementById('adm-error').style.display = 'none';
+    document.getElementById('adm-success').style.display = 'none';
+    document.getElementById('admin-modal').classList.add('active');
+}
+
+function hideAdminModal() { document.getElementById('admin-modal').classList.remove('active'); }
+
+function submitAdminRequest() {
+    const name = document.getElementById('adm-name').value;
+    const age = document.getElementById('adm-age').value;
+    const phone = document.getElementById('adm-phone').value;
+    const email = document.getElementById('adm-email').value;
+    const pass = document.getElementById('adm-pass').value;
+    const passConf = document.getElementById('adm-pass-confirm').value;
+    const errEl = document.getElementById('adm-error');
+    const succEl = document.getElementById('adm-success');
+
+    errEl.style.display = 'none';
+    
+    if(!name || !age || !phone || !email || !pass || !passConf) {
+        errEl.innerText = "يرجى ملء جميع الحقول المطلوبة";
+        errEl.style.display = 'block';
+        return;
+    }
+
+    if(pass !== passConf) {
+        errEl.innerText = "كلمات المرور غير متطابقة";
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const requestData = {
+        name: name,
+        age: age,
+        phone: phone,
+        email: email,
+        password: pass,
+        userId: auth.currentUser ? auth.currentUser.uid : 'guest',
+        timestamp: Date.now(),
+        status: 'pending'
+    };
+
+    db.ref('admin_requests').push(requestData).then(() => {
+        succEl.style.display = 'block';
+        document.getElementById('adm-btn').style.display = 'none';
+        setTimeout(() => {
+            hideAdminModal();
+            // إعادة تصفير النموذج
+            document.getElementById('adm-name').value = '';
+            document.getElementById('adm-age').value = '';
+            document.getElementById('adm-phone').value = '';
+            document.getElementById('adm-email').value = '';
+            document.getElementById('adm-pass').value = '';
+            document.getElementById('adm-pass-confirm').value = '';
+            document.getElementById('adm-btn').style.display = 'block';
+        }, 2500);
+    }).catch(error => {
+        errEl.innerText = "حدث خطأ: " + error.message;
+        errEl.style.display = 'block';
+    });
+}
   
 async function uploadCar() {  
     const carData = {  
@@ -443,9 +478,13 @@ async function uploadCar() {
         year: document.getElementById('in-year').value,  
         price: document.getElementById('in-price').value,  
         phone: document.getElementById('in-phone').value,  
+        notes: document.getElementById('in-notes').value,
         owner: auth.currentUser.uid,  
         status: 'pending'  
     };  
+
+    if(!editingId) carData.adid = generateADID();
+
     const files = document.getElementById('in-files').files;  
     if(files.length > 0) {  
         const imgs = [];  
@@ -455,14 +494,29 @@ async function uploadCar() {
             r.readAsDataURL(f); await promise;  
         }  
         carData.images = imgs;  
-    }  
-    db.ref('cars').push(carData).then(() => { showSuccess('upload-success', "تم الإرسال للمراجعة"); setTimeout(hideAddModal, 2000); });  
+    } else if(editingId) {
+        const old = allCars.find(x => x.id === editingId);
+        if(old && old.images) carData.images = old.images;
+    }
+    
+    if(editingId) {
+        db.ref('cars/' + editingId).update(carData).then(() => { 
+            document.getElementById('upload-success').style.display = 'block';
+            setTimeout(hideAddModal, 2000); 
+        });
+    } else {
+        db.ref('cars').push(carData).then(() => { 
+            document.getElementById('upload-success').style.display = 'block';
+            setTimeout(hideAddModal, 2000); 
+        });
+    }
 }  
   
 function toggleAuthMode() {  
     isSignUp = !isSignUp;  
     document.getElementById('auth-title').innerText = isSignUp ? "إنشاء حساب" : "MJD CARS";  
     document.getElementById('signup-fields').style.display = isSignUp ? "block" : "none";  
+    document.getElementById('confirm-pass-field').style.display = isSignUp ? "block" : "none";
 }  
   
 function handleAuth() {  
