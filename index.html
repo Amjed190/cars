@@ -12,14 +12,14 @@
 * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }  
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Tajawal", sans-serif; padding-bottom: 90px; overflow-x: hidden; font-size: 16px; }   
   
-/* منع التفاعل مع الخلفية عند فتح الشات */  
 body.modal-open { overflow: hidden; }  
   
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; animation: fadeIn 0.5s ease; }  
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }  
-  
+ 
 input, select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: #1a1a1a; color: #fff; outline: none; font-size: 15px; font-family: 'Tajawal'; margin-bottom: 10px; }  
 button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 800; font-family: 'Tajawal'; transition: 0.2s; }  
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-primary { background: var(--accent); color: #fff; width: 100%; }  
 .btn-danger { background: var(--danger); color: #fff; width: 100%; }  
   
@@ -57,12 +57,11 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 .vip-badge { color: var(--gold); border: 1px solid var(--gold); padding: 2px 6px; border-radius: 5px; font-size: 10px; }  
   
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }  
-.detail-box { background: #222; padding: 10px; border-radius: 12px; text-align: center; }  
+.detail-box { background: #222; padding: 10px; border-radius: 12px; text-align: center; border: 1px solid #333; }  
 .detail-box small { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }  
   
 .confirm-box { background: #1c1c1e; padding: 25px; border-radius: 25px; text-align: center; border: 1px solid var(--border); width: 90%; max-width: 320px; }  
   
-/* AI Chat Style */  
 .floating-help-btn { position: fixed; bottom: 100px; left: 20px; width: 55px; height: 55px; background: var(--accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 15px rgba(0,122,255,0.4); z-index: 2500; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); transition: 0.3s; }  
 .floating-help-btn:active { transform: scale(0.9); }  
   
@@ -102,14 +101,14 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
             <div id="signup-fields" style="display: none;">  
                 <input type="text" id="auth-name" placeholder="الاسم الكامل">  
                 <input type="number" id="auth-age" placeholder="العمر">  
-                <input type="tel" id="auth-phone" placeholder="رقم الهاتف">  
+                <input type="tel" id="auth-phone" placeholder="رقم الهاتف (07x)" maxlength="11" pattern="^07[578][0-9]{8}$">  
             </div>  
             <input type="email" id="auth-email" placeholder="البريد الإلكتروني">  
             <input type="password" id="auth-pass" placeholder="كلمة المرور">  
             <div id="confirm-pass-field" style="display: none;">  
                 <input type="password" id="auth-pass-confirm" placeholder="تأكيد كلمة المرور">  
             </div>  
-            <div id="auth-error" class="error-msg">خطأ في البيانات، يرجى المحاولة مرة أخرى</div>  
+            <div id="auth-error" class="error-msg"></div>  
             <div id="auth-success" class="success-msg">تمت العملية بنجاح! جارِ التحميل...</div>  
             <button onclick="handleAuth()" class="btn-primary" id="auth-main-btn" style="margin-top:10px">دخول</button>  
             <p onclick="toggleAuthMode()" id="auth-toggle" style="margin-top:20px; font-size:13px; color:var(--accent); cursor:pointer;">إنشاء حساب جديد</p>  
@@ -176,8 +175,8 @@ button { padding: 14px; border-radius: 12px; border: 0; cursor: pointer; font-we
 </div>  <div id="details-modal" class="overlay"><div class="modal" id="details-content"></div></div>  
 <div id="settings-modal" class="overlay" style="align-items: center;"><div class="confirm-box"><h3 style="margin-top:0">إعدادات العرض</h3><p style="color:var(--muted); font-size:14px;">تحكم في حجم خط التطبيق</p><div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0;"><button onclick="changeFontSize(-1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">-</button><span id="font-size-label" style="font-weight:bold; font-size:18px;">16px</span><button onclick="changeFontSize(1)" style="background:var(--border); color:#fff; width:50px; height:50px; font-size:20px;">+</button></div><button onclick="hideSettingsModal()" class="btn-primary">حفظ وإغلاق</button></div></div>  
 <div id="delete-confirm-modal" class="overlay" style="align-items: center;"><div class="confirm-box"><h3 style="margin-top:0">تأكيد الحذف</h3><p style="color:var(--muted); font-size:14px;">هل أنت متأكد من حذف هذا الإعلان نهائياً؟ لا يمكن التراجع.</p><button id="confirm-delete-btn" class="btn-danger" style="margin-bottom:10px;">نعم، حذف</button><button onclick="hideDeleteModal()" style="background:none; color:var(--fg); width:100%">إلغاء</button></div></div>  
-<div id="add-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3 id="modal-title">نشر إعلان جديد</h3><select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES-BENZ</option><option>ROLLS-ROYCE</option><option>RAM</option><option>LEXUS</option><option>FORD</option><option>CHEVROLET</option><option>GMC</option><option>KIA</option><option>HYUNDAI</option><option>DODGE</option><option>NISSAN</option></select><input type="text" id="in-model" placeholder="الموديل"><input type="text" id="in-color" placeholder="اللون"><input type="number" id="in-year" placeholder="سنة الصنع"><input type="text" id="in-price" placeholder="السعر"><input type="tel" id="in-phone" placeholder="رقم الهاتف"><select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option><option value="12">12 سلندر</option><option value="EV">كهربائية</option></select><textarea id="in-notes" rows="3" placeholder="ملاحظات إضافية"></textarea><input type="file" id="in-files" multiple accept="image/*"><div id="upload-error" class="error-msg">يرجى التحقق من كافة الحقول</div><div id="upload-success" class="success-msg">تم الإرسال بنجاح!</div><button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button><button onclick="hideAddModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  
-<div id="admin-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3>طلب انضمام للإدارة</h3><div id="adm-status-banner" style="display:none; padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px; text-align:center;"></div><p id="adm-desc" style="color:var(--muted); font-size:13px; margin-bottom:20px;">يرجى ملء البيانات التالية بدقة وسيتم مراجعة طلبك</p><div id="adm-form-fields"><input type="text" id="adm-name" placeholder="الاسم الكامل"><input type="number" id="adm-age" placeholder="العمر"><input type="tel" id="adm-phone" placeholder="رقم الهاتف"><input type="email" id="adm-email" placeholder="البريد الإلكتروني"><input type="password" id="adm-pass" placeholder="كلمة السر"><input type="password" id="adm-pass-confirm" placeholder="تأكيد كلمة السر"></div><div id="adm-error" class="error-msg" style="display: none;"></div><div id="adm-success" class="success-msg" style="display: none;">تم إرسال طلبك بنجاح!</div><button onclick="submitAdminRequest()" class="btn-primary" id="adm-btn">إرسال الطلب</button><button onclick="hideAdminModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  <script>  
+<div id="add-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3 id="modal-title">نشر إعلان جديد</h3><select id="in-brand"><option>TOYOTA</option><option>BMW</option><option>MERCEDES-BENZ</option><option>ROLLS-ROYCE</option><option>RAM</option><option>LEXUS</option><option>FORD</option><option>CHEVROLET</option><option>GMC</option><option>KIA</option><option>HYUNDAI</option><option>DODGE</option><option>NISSAN</option></select><input type="text" id="in-model" placeholder="الموديل"><input type="text" id="in-color" placeholder="اللون"><input type="number" id="in-year" placeholder="سنة الصنع"><input type="number" id="in-price" placeholder="السعر ($)"><input type="tel" id="in-phone" placeholder="رقم الهاتف (07x)" maxlength="11" pattern="^07[578][0-9]{8}$"><select id="in-cyl"><option value="4">4 سلندر</option><option value="6">6 سلندر</option><option value="8">8 سلندر</option><option value="12">12 سلندر</option><option value="EV">كهربائية</option></select><textarea id="in-notes" rows="3" placeholder="ملاحظات إضافية"></textarea><input type="file" id="in-files" multiple accept="image/*"><div id="upload-error" class="error-msg">يرجى التحقق من كافة الحقول</div><div id="upload-success" class="success-msg">تم الإرسال بنجاح!</div><button onclick="uploadCar()" class="btn-primary" id="upload-btn">نشر الآن</button><button onclick="hideAddModal()" id="cancel-upload-btn" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  
+<div id="admin-modal" class="overlay" style="align-items: center; background: rgba(0,0,0,1);"><div class="modal"><h3>طلب انضمام للإدارة</h3><div id="adm-status-banner" style="display:none; padding:15px; border-radius:12px; margin-bottom:15px; font-size:14px; text-align:center;"></div><p id="adm-desc" style="color:var(--muted); font-size:13px; margin-bottom:20px;">يرجى ملء البيانات التالية بدقة وسيتم مراجعة طلبك</p><div id="adm-form-fields"><input type="text" id="adm-name" placeholder="الاسم الكامل"><input type="number" id="adm-age" placeholder="العمر"><input type="tel" id="adm-phone" placeholder="رقم الهاتف (07x)" maxlength="11" pattern="^07[578][0-9]{8}$"><input type="email" id="adm-email" placeholder="البريد الإلكتروني"><input type="password" id="adm-pass" placeholder="كلمة السر"><input type="password" id="adm-pass-confirm" placeholder="تأكيد كلمة السر"></div><div id="adm-error" class="error-msg" style="display: none;"></div><div id="adm-success" class="success-msg" style="display: none;">تم إرسال طلبك بنجاح!</div><button onclick="submitAdminRequest()" class="btn-primary" id="adm-btn">إرسال الطلب</button><button onclick="hideAdminModal()" style="width:100%; background:none; color:#fff">إلغاء</button></div></div>  <script>  
 const firebaseConfig = {  
   apiKey: "AIzaSyDQC-h8a1CFBeXISxJnJjYrWTw3lH00dgU",  
   authDomain: "nickname-701a2.firebaseapp.com",  
@@ -193,7 +192,6 @@ const auth = firebase.auth(), db = firebase.database();
 let allCars = [], currentFilter = 'all', isSignUp = false, editingId = null, carToDelete = null;  
 let currentUserName = "المستخدم";  
   
-// AI Chat Advanced Logic (Modified to recognize app cars)
 const _k = "c2stb3ItdjEtZWE0ODQ0MTYyNTFlZjM5OGZkOWRkMjlkZmEyNDllZTMwNjM3YjJhMWYzMzMwNWQ3ZTNmY2Y3ODI0MmZmZTlmNA==";
 const OPENROUTER_API_KEY = atob(_k);
 const MODELS = ["openai/gpt-3.5-turbo", "google/gemini-2.0-flash-lite-001"];
@@ -213,7 +211,6 @@ async function sendToAI() {
     inputEl.value = "";
     msgArea.innerHTML += `<div class="msg user">${text}</div>`;
     
-    // بناء سياق بيانات السيارات للذكاء الاصطناعي
     const carsDataSummary = allCars.filter(c => c.status === 'approved').map(c => 
         `ماركة: ${c.brand}, موديل: ${c.model}, سعر: ${c.price}, سنة: ${c.year}, كود ADID: ${c.adid}, لون: ${c.color || 'غير محدد'}`
     ).join(' | ');
@@ -254,7 +251,6 @@ async function sendToAI() {
 function openAIChat() { document.getElementById('ai-chat-modal').classList.add('active'); document.body.classList.add('modal-open'); }
 function closeAIChat() { document.getElementById('ai-chat-modal').classList.remove('active'); document.body.classList.remove('modal-open'); }
 
-// ADID Generator
 function generateADID() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -262,7 +258,6 @@ function generateADID() {
     return result;
 }
 
-// Settings & Auth logic
 let currentFontSize = 16;  
 function showSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }  
 function hideSettingsModal() { document.getElementById('settings-modal').classList.remove('active'); }  
@@ -310,7 +305,9 @@ function renderHome() {
   
 function carCard(c, isPersonal = false) {  
     const vipBrands = ['BMW','MERCEDES-BENZ','LEXUS','ROLLS-ROYCE','PORSCHE'];  
-    const isVip = vipBrands.includes(c.brand) && parseInt(c.year) >= 2022;  
+    const numPrice = parseInt(c.price.toString().replace(/[^0-9]/g, '')) || 0;
+    const isVip = (vipBrands.includes(c.brand) && parseInt(c.year) >= 2022) || numPrice >= 70000;  
+    
     let statusBadge = "";  
     if(isPersonal) {  
         const s = c.status;  
@@ -325,9 +322,12 @@ function runSearch() {
     const query = document.getElementById('search-input').value.toLowerCase();  
     let filtered = allCars.filter(c => c.status === 'approved');  
     if(currentFilter === 'vip') {  
-        filtered = filtered.filter(c => ['BMW','MERCEDES-BENZ','LEXUS','ROLLS-ROYCE','PORSCHE'].includes(c.brand) && parseInt(c.year) >= 2022);  
+        filtered = filtered.filter(c => {
+            const numPrice = parseInt(c.price.toString().replace(/[^0-9]/g, '')) || 0;
+            return (['BMW','MERCEDES-BENZ','LEXUS','ROLLS-ROYCE','PORSCHE'].includes(c.brand) && parseInt(c.year) >= 2022) || numPrice >= 70000;
+        });  
     } else if(currentFilter === 'cheap') {  
-        filtered = filtered.filter(c => parseInt(c.price.replace(/[^0-9]/g, '')) < 15000);  
+        filtered = filtered.filter(c => parseInt(c.price.toString().replace(/[^0-9]/g, '')) < 99000);  
     }  
     if(query) filtered = filtered.filter(c => c.brand.toLowerCase().includes(query) || c.model.toLowerCase().includes(query) || (c.adid && c.adid.toLowerCase().includes(query)));  
     document.getElementById('search-results').innerHTML = filtered.map(c => carCard(c)).join('') || "<p style='text-align:center; grid-column: 1/-1;'>لا توجد نتائج</p>";  
@@ -347,13 +347,14 @@ function showDetails(id) {
     const isOwner = myUid === c.owner;  
     document.getElementById('details-content').innerHTML = `  
         <div class="photo-slider">${c.images ? c.images.map(img => `<img src="${img}">`).join('') : ''}</div>  
-        <div style="display:flex; justify-content:space-between; align-items:center;"><h2>${c.brand} ${c.model}</h2><span>👁️ ${viewers.length}</span></div>  
-        <p style="font-size:11px; color:var(--muted); margin-top:-10px;">ADID: ${c.adid || 'N/A'}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h2>${c.brand} ${c.model}</h2></div>  
         <div class="detail-grid">  
             <div class="detail-box"><small>السعر</small><b>${c.price}</b></div>  
             <div class="detail-box"><small>الموديل</small><b>${c.model}</b></div>  
             <div class="detail-box"><small>اللون</small><b>${c.color || '-'}</b></div>  
             <div class="detail-box"><small>سنة الصنع</small><b>${c.year}</b></div>  
+            <div class="detail-box"><small>ADID</small><b style="font-family:monospace; color:var(--accent);">${c.adid || 'N/A'}</b></div>
+            <div class="detail-box"><small>المشاهدات</small><b>👁️ ${viewers.length}</b></div>
         </div>  
         <a href="tel:${c.phone}" style="display:block; text-align:center; background:var(--success); color:#fff; padding:15px; border-radius:12px; text-decoration:none; font-weight:900; margin-bottom:10px;">اتصال 📞</a>  
         ${isOwner ? `
@@ -406,7 +407,6 @@ document.getElementById('confirm-delete-btn').onclick = function() {
     if(carToDelete) db.ref('cars/' + carToDelete).remove().then(() => { hideDeleteModal(); closeDetails(); });  
 };  
 
-// قسم التقديم للإدارة - تفعيل الوظائف
 function showAdminForm() {
     document.getElementById('adm-error').style.display = 'none';
     document.getElementById('adm-success').style.display = 'none';
@@ -433,6 +433,13 @@ function submitAdminRequest() {
         return;
     }
 
+    const phoneRegex = /^07[578][0-9]{8}$/;
+    if(!phoneRegex.test(phone)) {
+        errEl.innerText = "رقم الهاتف غير صحيح (يجب أن يبدأ بـ 075 أو 077 أو 078 ويتكون من 11 رقم)";
+        errEl.style.display = 'block';
+        return;
+    }
+
     if(pass !== passConf) {
         errEl.innerText = "كلمات المرور غير متطابقة";
         errEl.style.display = 'block';
@@ -455,7 +462,6 @@ function submitAdminRequest() {
         document.getElementById('adm-btn').style.display = 'none';
         setTimeout(() => {
             hideAdminModal();
-            // إعادة تصفير النموذج
             document.getElementById('adm-name').value = '';
             document.getElementById('adm-age').value = '';
             document.getElementById('adm-phone').value = '';
@@ -471,13 +477,28 @@ function submitAdminRequest() {
 }
   
 async function uploadCar() {  
+    const btn = document.getElementById('upload-btn');
+    const cancelBtn = document.getElementById('cancel-upload-btn');
+    const oldText = btn.innerText;
+    const phoneInput = document.getElementById('in-phone').value;
+    
+    const phoneRegex = /^07[578][0-9]{8}$/;
+    if(!phoneRegex.test(phoneInput)) {
+        alert("خطأ: رقم الهاتف يجب أن يبدأ بـ 075 أو 077 أو 078 ويحتوي على 11 رقماً");
+        return;
+    }
+
+    btn.innerText = "جاري الرفع... ⏳";
+    btn.disabled = true;
+    if(cancelBtn) cancelBtn.style.display = 'none';
+
     const carData = {  
         brand: document.getElementById('in-brand').value,  
         model: document.getElementById('in-model').value,  
         color: document.getElementById('in-color').value,  
         year: document.getElementById('in-year').value,  
         price: document.getElementById('in-price').value,  
-        phone: document.getElementById('in-phone').value,  
+        phone: phoneInput,  
         notes: document.getElementById('in-notes').value,
         owner: auth.currentUser.uid,  
         status: 'pending'  
@@ -499,16 +520,25 @@ async function uploadCar() {
         if(old && old.images) carData.images = old.images;
     }
     
-    if(editingId) {
-        db.ref('cars/' + editingId).update(carData).then(() => { 
-            document.getElementById('upload-success').style.display = 'block';
-            setTimeout(hideAddModal, 2000); 
-        });
-    } else {
-        db.ref('cars').push(carData).then(() => { 
-            document.getElementById('upload-success').style.display = 'block';
-            setTimeout(hideAddModal, 2000); 
-        });
+    try {
+        if(editingId) {
+            await db.ref('cars/' + editingId).update(carData);
+        } else {
+            await db.ref('cars').push(carData);
+        }
+        document.getElementById('upload-success').style.display = 'block';
+        setTimeout(() => {
+            hideAddModal();
+            btn.innerText = oldText;
+            btn.disabled = false;
+            if(cancelBtn) cancelBtn.style.display = 'block';
+            document.getElementById('upload-success').style.display = 'none';
+        }, 2000);
+    } catch (err) {
+        btn.innerText = oldText;
+        btn.disabled = false;
+        if(cancelBtn) cancelBtn.style.display = 'block';
+        alert("حدث خطأ أثناء الرفع: " + err.message);
     }
 }  
   
@@ -517,14 +547,76 @@ function toggleAuthMode() {
     document.getElementById('auth-title').innerText = isSignUp ? "إنشاء حساب" : "MJD CARS";  
     document.getElementById('signup-fields').style.display = isSignUp ? "block" : "none";  
     document.getElementById('confirm-pass-field').style.display = isSignUp ? "block" : "none";
+    document.getElementById('auth-main-btn').innerText = isSignUp ? "إنشاء حساب" : "دخول";
+    document.getElementById('auth-toggle').innerText = isSignUp ? "لديك حساب بالفعل؟ تسجيل الدخول" : "إنشاء حساب جديد";
 }  
   
 function handleAuth() {  
     const e = document.getElementById('auth-email').value, p = document.getElementById('auth-pass').value;  
-    const n = document.getElementById('auth-name').value;  
-    if(isSignUp) auth.createUserWithEmailAndPassword(e, p).then(res => {  
-        db.ref('users/' + res.user.uid).set({email: e, name: n, role: 'user'});  
-    }); else auth.signInWithEmailAndPassword(e, p);  
+    const n = document.getElementById('auth-name').value;
+    const ph = document.getElementById('auth-phone').value;
+    const age = parseInt(document.getElementById('auth-age').value);
+    const errEl = document.getElementById('auth-error');
+    const succEl = document.getElementById('auth-success');
+    const btn = document.getElementById('auth-main-btn');
+
+    errEl.style.display = 'none';
+
+    if(isSignUp) {
+        if(!n || !ph || isNaN(age)) {
+            errEl.innerText = "يرجى ملء جميع الحقول";
+            errEl.style.display = 'block';
+            return;
+        }
+        if(age < 18) {
+            alert("عذراً، يمنع استخدام المنصة لمن هم تحت سن 18 عاماً.");
+            return;
+        }
+        const phoneRegex = /^07[578][0-9]{8}$/;
+        if(!phoneRegex.test(ph)) {
+            errEl.innerText = "رقم الهاتف يجب أن يبدأ بـ 075 أو 077 أو 078";
+            errEl.style.display = 'block';
+            return;
+        }
+        if(p.length < 6) {
+            errEl.innerText = "كلمة المرور يجب أن تكون 6 خانات على الأقل";
+            errEl.style.display = 'block';
+            return;
+        }
+        const cp = document.getElementById('auth-pass-confirm').value;
+        if(p !== cp) {
+            errEl.innerText = "كلمات المرور غير متطابقة";
+            errEl.style.display = 'block';
+            return;
+        }
+
+        btn.innerText = "جاري الانتظار... ⏳";
+        btn.disabled = true;
+
+        auth.createUserWithEmailAndPassword(e, p).then(res => {  
+            db.ref('users/' + res.user.uid).set({email: e, name: n, role: 'user', phone: ph, age: age});  
+            succEl.style.display = 'block';
+        }).catch(err => {
+            btn.innerText = "إنشاء حساب";
+            btn.disabled = false;
+            errEl.innerText = "خطأ: " + err.message;
+            errEl.style.display = 'block';
+        }); 
+    } else {
+        if(!e || !p) {
+            errEl.innerText = "يرجى إدخال البريد وكلمة المرور";
+            errEl.style.display = 'block';
+            return;
+        }
+        btn.innerText = "جاري التحميل...";
+        btn.disabled = true;
+        auth.signInWithEmailAndPassword(e, p).catch(err => {
+            btn.innerText = "دخول";
+            btn.disabled = false;
+            errEl.innerText = "خطأ في الدخول: تأكد من بياناتك";
+            errEl.style.display = 'block';
+        });
+    }
 }  
   
 window.onclick = function(e) { if(e.target.classList.contains('overlay')) { e.target.classList.remove('active'); document.body.classList.remove('modal-open'); } }  
